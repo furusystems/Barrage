@@ -1,4 +1,5 @@
 package com.furusystems.barrage.data;
+import hscript.Parser;
 
 /**
  * ...
@@ -12,10 +13,11 @@ class Token
 	{
 		this.type = type;
 		switch(type) {
-			case TokenType.float_token:
+			case TokenType.number_token:
 				this.data = Std.parseFloat(data);
-			case TokenType.const_math_token, TokenType.const_math_token:
-				this.data = data;
+			case TokenType.const_math_token, TokenType.script_token:
+				var parser:Parser = new Parser();
+				this.data = parser.parseString(data);
 			default:
 				this.data = data;
 		}

@@ -1,0 +1,44 @@
+# Comments are prefixed with pound sign
+
+# A barrage has an abstract origin defined by the implementation
+# It represents a starting action that results in bullets being created
+# Actions can have sub-actions, and bullets themselves have individual actions with sub-actions
+# Actions triggered by bullets use the bullet's position as origin
+
+# First define the base identity and orientation of this barrage
+horizontal barrage called boss_grow_bullets
+	# Define and name a bullet
+	# bullets can be left anonymous if no referencing is required
+	bullet called seed
+		# initial properties are speed and acceleration. Acceleration defaults to flat rate.
+		speed is 1.2
+		# do blocks trigger an action
+		# action block elements take place sequentially, temporally separated with wait blocks
+		do action
+			# speed and acceleration are common bullet properties
+			# "over" keyword allows for temporal spread
+			set speed to 0 over 60 frames
+			# frames and seconds are valid values
+			wait 60 frames
+			# "fire" blocks take a named bullet or an anonymous "bullet"
+			# "at TYPE speed" and "in TYPE direction" properties allow bullet property override
+			fire bullet at speed 0.75
+			do action
+				fire bullet at sequential speed 0.15
+				# all commands in parentheses are parsed to hscript and interpreted at runtime
+				# if no variables are used, the script is executed at compile time into a constant
+				# repeat blocks cause actions to retrigger (duh)
+				repeat (4 * difficulty * 4) times
+			# vanish block causes a bullet to immediately die
+			vanish
+
+	# Define the starting action (barrage invalid if undefined)
+	# named actions are manually predefined
+	action called start
+		# fire a named bullet
+		fire seed in absolute direction (270 - 4 + difficulty * 6 * 15 * 0.5)
+		# anonymous actions are hoisted by the parser and given a unique ID internally for reuse
+		do action
+			# sequential direction applies a flat modifier to the previous direction used within this action
+			fire seed in sequential direction 15 
+			repeat (4 + difficulty * 6) times

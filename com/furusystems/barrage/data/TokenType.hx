@@ -10,13 +10,12 @@ enum TokenType
 	vertical_token;
 	barrage_token;
 	speed_token;
-	times_token;
 	fire_token;
 	identifier_token;
 	do_token;
 	script_token;
 	const_math_token;
-	float_token;
+	number_token;
 	direction_token;
 	sequential_token;
 	absolute_token;
@@ -39,5 +38,6 @@ enum TokenType
 	//then_token;
 	//is_token;
 	//to_token;
+	//times_token;
 	
 }
