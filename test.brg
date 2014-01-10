@@ -5,8 +5,8 @@
 # Actions can have sub-actions, and bullets themselves have individual actions with sub-actions
 # Actions triggered by bullets use the bullet's position as origin
 
-# First define the base identity and orientation of this barrage
-horizontal barrage called boss_grow_bullets
+# First define the base identity of this barrage
+barrage called boss_grow_bullets
 	# Define and name a bullet
 	# bullets can be left anonymous if no referencing is required
 	bullet called seed
@@ -30,7 +30,7 @@ horizontal barrage called boss_grow_bullets
 				# repeat blocks cause actions to retrigger (duh)
 				repeat (4 * difficulty * 4) times
 			# vanish block causes a bullet to immediately die
-			vanish
+			die
 
 	# Define the starting action (barrage invalid if undefined)
 	# named actions are manually predefined

@@ -73,7 +73,7 @@ class Parser
 		return out;
 	}
 	
-	static private function getBlocks(lines:Array<Line>):Array<Block> 
+	static function getBlocks(lines:Array<Line>):Array<Block> 
 	{
 		var out:Array<Block> = [];
 		getBlock(0, lines, out);
@@ -84,7 +84,7 @@ class Parser
 		return out;
 	}
 	
-	static private function processBlock(b:Block) 
+	static function processBlock(b:Block) 
 	{
 		parseString(b);
 		readStatement(b);
@@ -93,11 +93,11 @@ class Parser
 		}
 	}
 	
-	static private function readStatement(b:Block):Void 
+	static function readStatement(b:Block):Void 
 	{
 		//trace(b.raw);
 		switch(b.tokens) {
-			case [THorizontal | TVertical, TBarrage, TIdentifier]:
+			case [TBarrage, TIdentifier]:
 				trace("Declaration");
 			case [TBullet, TIdentifier]:
 				trace("Bullet def");
@@ -107,18 +107,28 @@ class Parser
 				trace("Action def");
 			case [TSpeed|TDirection|TAcceleration, TNumber|TConst_math|TScript]:
 				trace("Property init");
-			case [TSet, TSpeed | TDirection | TAcceleration, TNumber|TConst_math|TScript] | [TSet, TSpeed | TDirection | TAcceleration, TNumber|TConst_math|TScript, TOver, TNumber|TConst_math|TScript, TSeconds | TFrames]:
+			case [TSet, TSpeed | TDirection | TAcceleration, TNumber | TConst_math | TScript]:
 				trace("Property set");
+			case [TSet, TSpeed | TDirection | TAcceleration, TNumber|TConst_math|TScript, TOver, TNumber|TConst_math|TScript, TSeconds | TFrames]:
+				trace("Property set over time");
 			case [TWait, TNumber|TConst_math|TScript, TFrames | TSeconds]:
 				trace("Wait");
-			case [TDo, TAction | TIdentifier]:
-				trace("Action trigger");
-			case [TFire, TIdentifier | TBullet] | 
-				[TFire, TIdentifier | TBullet, TAt, TSequential | TAbsolute | TRelative, TSpeed, TNumber | TConst_math | TScript] | 
-				[TFire, TIdentifier | TBullet, TIn, TSequential | TAbsolute | TRelative | TAimed, TDirection, TNumber | TConst_math | TScript] | 
-				[TFire, TIdentifier | TBullet, TAt, TSequential | TAbsolute | TRelative, TSpeed, TNumber | TConst_math | TScript, TIn, TSequential | TAbsolute | TRelative | TAimed, TDirection, TNumber | TConst_math | TScript] | 
-				[TFire, TIdentifier | TBullet, TIn, TSequential | TAbsolute | TRelative | TAimed, TDirection, TNumber | TConst_math | TScript, TAt, TSequential | TAbsolute | TRelative, TSpeed, TNumber | TConst_math | TScript]:
-				trace("Fire bullet");
+			case [TDo, TAction]:
+				trace("Action trigger: Anonymous");
+			case [TDo, TIdentifier]:
+				trace("Action trigger: Named");
+			case [TFire, TBullet]:
+				trace("Fire bullet: Anonymous");
+			case [TFire, TIdentifier]:
+				trace("Fire bullet: Named");
+			case [TFire, TIdentifier | TBullet, TAt, TSequential | TAbsolute | TRelative, TSpeed, TNumber | TConst_math | TScript]:
+				trace("Fire bullet at speed");
+			case [TFire, TIdentifier | TBullet, TIn, TSequential | TAbsolute | TRelative | TAimed, TDirection, TNumber | TConst_math | TScript]:
+				trace("Fire bullet in direction");
+			case [TFire, TIdentifier | TBullet, TAt, TSequential | TAbsolute | TRelative, TSpeed, TNumber | TConst_math | TScript, TIn, TSequential | TAbsolute | TRelative | TAimed, TDirection, TNumber | TConst_math | TScript]:
+				trace("Fire bullet at speed in direction");
+			case [TFire, TIdentifier | TBullet, TIn, TSequential | TAbsolute | TRelative | TAimed, TDirection, TNumber | TConst_math | TScript, TAt, TSequential | TAbsolute | TRelative, TSpeed, TNumber | TConst_math | TScript]:
+				trace("Fire bullet in direction at speed");
 			case [TRepeat, TNumber | TConst_math | TScript]:
 				trace("Repeat");
 			case [TVanish]:
@@ -129,7 +139,7 @@ class Parser
 		
 	}
 	
-	static private function getToken(bank:Array<String>, tokens:Array<Token>, values:Array<Dynamic>):Void 
+	static function getToken(bank:Array<String>, tokens:Array<Token>, values:Array<Dynamic>):Void 
 	{
 		var buffer:Array<String> = [];
 		var char:String = bank.pop();
@@ -148,13 +158,13 @@ class Parser
 		}
 		buffer.reverse();
 		var data = StringTools.trim(buffer.join(""));
-		var type:Token = getTokenType(data);
+		var type = getTokenType(data);
 		if (type == TIgnored) return;
 		
 		tokens.push(type);
 		values.push(data);
 	}
-	static private function getTokenType(data:String):Token {
+	static function getTokenType(data:String):Token {
 		if (math.match(data)) {
 			return TConst_math;
 		}
@@ -194,7 +204,7 @@ class Parser
 				return TFrames;
 			case "seconds":
 				return TSeconds;
-			case "vanish":
+			case "vanish"|"die":
 				return TVanish;
 			case "over":
 				return TOver;
@@ -212,13 +222,15 @@ class Parser
 				return TWait;
 			case "repeat":
 				return TRepeat;
+			case "start":
+				return TStart;
 			default:
 				return TIdentifier;
 		}
 	}
 	
 	
-	static private function parseString(block:Block):Void
+	static function parseString(block:Block):Void
 	{
 		var bank:Array<String> = block.raw.split("");
 		while (bank[bank.length - 1] == " ") bank.pop();
@@ -233,9 +245,9 @@ class Parser
 		block.tokens = tokens;
 		block.values = values;
 	}
-	static private function getBlock(start:Int, lines:Array<Line>, out:Array<Block>):Int {
-		var root:Line = lines[start];
-		var b:Block = new Block();
+	static function getBlock(start:Int, lines:Array<Line>, out:Array<Block>):Int {
+		var root = lines[start];
+		var b = new Block();
 		b.lineNo = start;
 		out.push(b);
 		b.raw = root.data;
@@ -271,7 +283,7 @@ class Parser
 	}
 	
 }
-private class Line {
+class Line {
 	public var index:Int = 0;
 	public var level:Int = 0;
 	public var data:String;
@@ -282,7 +294,7 @@ private class Line {
 		return 'Line [ $index, $level, $data ]';
 	}
 }
-private class Block {
+class Block {
 	public var lineNo:Int;
 	public var tokens:Array<Token>;
 	public var values:Array<Dynamic>;
