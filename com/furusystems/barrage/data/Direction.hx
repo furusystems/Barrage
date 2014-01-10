@@ -1,5 +1,5 @@
-package com.furusystems.barrage.data;
-import com.furusystems.barrage.data.Direction.DirectionType;
+package com.furusystems.barrage.parser;
+import com.furusystems.barrage.parser.Direction.DirectionType;
 
 /**
  * ...
