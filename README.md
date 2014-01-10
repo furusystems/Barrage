@@ -13,6 +13,8 @@ Barrage scripts can be parsed at runtime from loaded files or at compile-time us
 
 Language
 ========
+The following describes a bullet system where the initial action fires a linear spread of "seed" bullets, which decelerate over time until they each erupt into a new set of bullets, where each fired bullet is slightly faster than the previous.
+
 	# Comments are prefixed with pound sign
 	
 	# A Barrage has a starting Action that results in bullets being created
@@ -39,7 +41,7 @@ Language
 				# "fire" blocks take a named bullet or an anonymous "bullet"
 				fire bullet at absolute speed 0.75
 				do action
-					fire bullet at sequential speed 0.15
+					fire bullet at sequential speed 0.15 in aimed direction
 					# repeat blocks cause actions to retrigger (duh)
 					# all commands in parentheses are parsed to hscript
 					# hscript values are executed at runtime
