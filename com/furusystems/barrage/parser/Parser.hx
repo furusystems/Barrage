@@ -1,8 +1,10 @@
 package com.furusystems.barrage.parser;
 import com.furusystems.barrage.Barrage;
 import com.furusystems.barrage.data.Orientation;
+import com.furusystems.barrage.parser.Parser.Block;
 import com.furusystems.barrage.parser.Token;
 import haxe.ds.Vector;
+import hscript.Interp;
 
 /**
  * ...
@@ -11,7 +13,8 @@ import haxe.ds.Vector;
 class Parser
 {
 	static var number:EReg = ~/[0-9]+[.,]*[0-9]*/;
-	static var math:EReg = ~/\(.*\)/;
+	static var math:EReg = ~/\([.\d *\-\+\/]*\)/;
+	static var script:EReg = ~/\(.*\)/;
 
 	public static function parse(data:String):Barrage {
 		return buildBarrage(getBlocks(getLines(data)));
@@ -23,10 +26,6 @@ class Parser
 		for (i in 0...root.tokens.length) {
 			var t = root.tokens[i];
 			switch(t) {
-				case TVertical:
-					out.orientation = Orientation.VERTICAL;
-				case THorizontal:
-					out.orientation = Orientation.HORIZONTAL;
 				case TIdentifier:
 					out.name = root.values[i];
 				default:
@@ -93,52 +92,6 @@ class Parser
 		}
 	}
 	
-	static function readStatement(b:Block):Void 
-	{
-		//trace(b.raw);
-		switch(b.tokens) {
-			case [TBarrage, TIdentifier]:
-				trace("Declaration");
-			case [TBullet, TIdentifier]:
-				trace("Bullet def");
-			case [TAction, TStart]:
-				trace("Init action def");
-			case [TAction, TIdentifier]:
-				trace("Action def");
-			case [TSpeed|TDirection|TAcceleration, TNumber|TConst_math|TScript]:
-				trace("Property init");
-			case [TSet, TSpeed | TDirection | TAcceleration, TNumber | TConst_math | TScript]:
-				trace("Property set");
-			case [TSet, TSpeed | TDirection | TAcceleration, TNumber|TConst_math|TScript, TOver, TNumber|TConst_math|TScript, TSeconds | TFrames]:
-				trace("Property set over time");
-			case [TWait, TNumber|TConst_math|TScript, TFrames | TSeconds]:
-				trace("Wait");
-			case [TDo, TAction]:
-				trace("Action trigger: Anonymous");
-			case [TDo, TIdentifier]:
-				trace("Action trigger: Named");
-			case [TFire, TBullet]:
-				trace("Fire bullet: Anonymous");
-			case [TFire, TIdentifier]:
-				trace("Fire bullet: Named");
-			case [TFire, TIdentifier | TBullet, TAt, TSequential | TAbsolute | TRelative, TSpeed, TNumber | TConst_math | TScript]:
-				trace("Fire bullet at speed");
-			case [TFire, TIdentifier | TBullet, TIn, TSequential | TAbsolute | TRelative | TAimed, TDirection, TNumber | TConst_math | TScript]:
-				trace("Fire bullet in direction");
-			case [TFire, TIdentifier | TBullet, TAt, TSequential | TAbsolute | TRelative, TSpeed, TNumber | TConst_math | TScript, TIn, TSequential | TAbsolute | TRelative | TAimed, TDirection, TNumber | TConst_math | TScript]:
-				trace("Fire bullet at speed in direction");
-			case [TFire, TIdentifier | TBullet, TIn, TSequential | TAbsolute | TRelative | TAimed, TDirection, TNumber | TConst_math | TScript, TAt, TSequential | TAbsolute | TRelative, TSpeed, TNumber | TConst_math | TScript]:
-				trace("Fire bullet in direction at speed");
-			case [TRepeat, TNumber | TConst_math | TScript]:
-				trace("Repeat");
-			case [TVanish]:
-				trace("Vanish");
-			default:
-				throw "Unrecognized line " + b.lineNo+' "'+b.tokens+'"';
-		}
-		
-	}
-	
 	static function getToken(bank:Array<String>, tokens:Array<Token>, values:Array<Dynamic>):Void 
 	{
 		var buffer:Array<String> = [];
@@ -162,11 +115,29 @@ class Parser
 		if (type == TIgnored) return;
 		
 		tokens.push(type);
-		values.push(data);
+		values.push(buildValue(data, type));
+	}
+	
+	static private function buildValue(data:String, type:Token):Dynamic 
+	{
+		switch(type) {
+			case TScript:
+				return new hscript.Parser().parseString(data);
+			case TConst_math:
+				var expr = new hscript.Parser().parseString(data);
+				return new hscript.Interp().execute(expr);
+			case TNumber:
+				return Std.parseFloat(data);
+			default:
+				return data;
+		}
 	}
 	static function getTokenType(data:String):Token {
 		if (math.match(data)) {
 			return TConst_math;
+		}
+		if (script.match(data)) {
+			return TScript;
 		}
 		if (number.match(data)) {
 			return TNumber;
@@ -238,7 +209,7 @@ class Parser
 		var tokens:Array<Token> = [];
 		var values:Array<Dynamic> = [];
 		while (bank.length > 0) {
-			getToken(bank, tokens,values);
+			getToken(bank, tokens, values);
 		}
 		tokens.reverse();
 		values.reverse();
@@ -277,6 +248,182 @@ class Parser
 			printBlock(bl);
 		}
 	}
+	
+	
+	
+	static function readStatement(b:Block):Void 
+	{
+		//trace(b.raw);
+		switch(b.tokens) {
+			case [TBarrage, TIdentifier]:
+				runDeclaration(b);
+			case [TBullet, TIdentifier]:
+				runBulletDef(b);
+			case [TAction, TStart]:
+				runActionDef(b, true);
+			case [TAction, TIdentifier]:
+				runActionDef(b, false);
+			case [TSpeed | TDirection | TAcceleration, TNumber | TConst_math | TScript]:
+				runPropertyInit(b);
+			case [TSet, TSpeed | TDirection | TAcceleration, TNumber | TConst_math | TScript]:
+				runPropertySet(b);
+			case [TSet, TSpeed | TDirection | TAcceleration, TNumber|TConst_math|TScript, TOver, TNumber|TConst_math|TScript, TSeconds | TFrames]:
+				runPropertySet(b,true);
+			case [TWait, TNumber|TConst_math|TScript, TFrames | TSeconds]:
+				runWait(b);
+			case [TDo, TAction]:
+				runAction(b, true);
+			case [TDo, TIdentifier]:
+				runAction(b, false);
+			case [TFire, TBullet] | [TFire, TIdentifier]:
+				runFire(b);
+			case [TFire, TIdentifier | TBullet, TAt, TSequential | TAbsolute | TRelative, TSpeed, TNumber | TConst_math | TScript]:
+				runFire(b, b.tokens[3], b.values[5]);
+			case [TFire, TIdentifier | TBullet, TIn, TSequential | TAbsolute | TRelative | TAimed, TDirection, TNumber | TConst_math | TScript]:
+				runFire(b,null,null,b.tokens[3], b.values[5]);
+			case [TFire, TIdentifier | TBullet, TAt, TSequential | TAbsolute | TRelative, TSpeed, TNumber | TConst_math | TScript, TIn, TSequential | TAbsolute | TRelative | TAimed, TDirection, TNumber | TConst_math | TScript]:
+				runFire(b, b.tokens[3], b.values[5], b.tokens[7], b.values[9]);
+			case [TFire, TIdentifier | TBullet, TIn, TSequential | TAbsolute | TRelative | TAimed, TDirection, TNumber | TConst_math | TScript, TAt, TSequential | TAbsolute | TRelative, TSpeed, TNumber | TConst_math | TScript]:
+				runFire(b, b.tokens[7], b.values[9], b.tokens[3], b.values[5]);
+			case [TRepeat, TNumber | TConst_math | TScript]:
+				runRepeat(b);
+			case [TVanish]:
+				runVanish(b);
+			default:
+				throw "Unrecognized line " + b.lineNo+' "'+b.tokens+'"';
+		}
+		
+	}
+	
+	//Statement handlers
+	
+	static inline function runVanish(b:Block) 
+	{
+		trace("Vanish");
+	}
+	
+	static inline function runRepeat(b:Block) 
+	{
+		trace("Repeat " + b.values[1]);
+	}
+	
+	static inline function runFire(b:Block, ?speedType:Token, ?speed:Dynamic, ?directionType:Token, ?direction:Dynamic) 
+	{
+		var anon:Bool = false;
+		switch(b.tokens[1]) {
+			case TIdentifier:
+				anon = false;
+			case TBullet:
+				anon = true;
+			default:
+				throw("Invalid fire statement");
+		}
+		if (anon) {
+			trace("Fire anonymous bullet");
+		}else {
+			trace("Fire bullet " + b.values[1]);
+		}
+		if (speed != null) {
+			trace("\t\t" + speedType + " speed " + speed);
+		}
+		if (direction != null) {
+			trace("\t\t" + directionType + " direction " + direction);
+		}
+	}
+	
+	static inline function runAction(b:Block, anon:Bool) 
+	{
+		if (anon) {
+			trace("Run anonymous action");
+		}else {
+			trace("Run action " + b.values[1]);
+		}
+	}
+	
+	static inline function runWait(b:Block) 
+	{
+		switch(b.tokens[1]) {
+			case TNumber:
+			case TConst_math:
+			case TScript:
+			default:
+				
+		}
+		switch(b.tokens[2]) {
+			case TFrames:
+			case TSeconds:
+			default:
+				
+		}
+		trace("Wait for " + b.values[1] + " " + b.tokens[2]);
+	}
+	
+	static inline function runPropertySet(b:Block,overTime:Bool = false) 
+	{
+		var target:String = "";
+		var value:Null<Dynamic>;
+		switch(b.tokens[1]) {
+			case TSpeed:
+			case TDirection:
+			case TAcceleration:
+			default:
+		}
+		switch(b.tokens[2]) {
+			case TNumber:
+			case TConst_math:
+			case TScript:
+			default:
+		}
+		if (overTime) {
+			switch(b.tokens[4]) {
+				case TNumber:
+				case TConst_math:
+				case TScript:
+				default:
+			}
+			switch(b.tokens[5]) {
+				case TSeconds:
+				case TFrames:
+				default:
+			}
+		}
+		trace("Set property " + b.tokens[1] + " to " + b.values[2] + (overTime?(" over "+b.values[4] + " " + b.tokens[5]):""));
+	}
+	
+	static inline function runPropertyInit(b:Block) 
+	{
+		var target:String = "";
+		var value:Null<Dynamic>;
+		switch(b.tokens[0]) {
+			case TSpeed:
+			case TDirection:
+			case TAcceleration:
+			default:
+		}
+		switch(b.tokens[1]) {
+			case TNumber:
+			case TConst_math:
+			case TScript:
+			default:
+		}
+		trace("Property init: " + b.tokens[0] + " = " + b.values[1]);
+	}
+	
+	static inline function runActionDef(b:Block, isStart:Bool = false) 
+	{
+		if (isStart) trace("Init action def");
+		else trace("Action def " + b.values[1]);
+	}
+	
+	static inline function runBulletDef(b:Block) 
+	{
+		trace("Bullet def: "+b.values[1]);
+	}
+	static inline function runDeclaration(b:Block) 
+	{
+		trace("Declaration: " + b.values[1]);
+	}
+	
 	public function new() 
 	{
 		
@@ -304,7 +451,6 @@ class Block {
 		children = [];
 	}
 	public function toString():String {
-		//var out:String = "Block "+children.length+"\n";
 		var out:String = raw+"{";
 		for (i in 0...children.length) {
 			out += "\n\t"+children[i];
