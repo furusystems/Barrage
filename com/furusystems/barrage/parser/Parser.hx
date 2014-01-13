@@ -23,15 +23,7 @@ class Parser
 	static function buildBarrage(blocks:Array<Block>):Barrage {
 		var out:Barrage = new Barrage();
 		var root = blocks[0]; //Barrage has exactly one root block
-		for (i in 0...root.tokens.length) {
-			var t = root.tokens[i];
-			switch(t) {
-				case TIdentifier:
-					out.name = root.values[i];
-				default:
-					continue;
-			}
-		}
+		out.name = root.values[1];
 		trace("Parsing complete\n\n");
 		printBlock(root);
 		

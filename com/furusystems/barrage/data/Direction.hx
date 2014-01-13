@@ -1,5 +1,4 @@
 package com.furusystems.barrage.parser;
-import com.furusystems.barrage.parser.Direction.DirectionType;
 
 /**
  * ...
@@ -13,7 +12,9 @@ enum DirectionType {
 }
 class Direction
 {
-	public var type:DirectionType;
+	public var type:DirectionType
+	public var constValue:Float = 0;
+	public var script:Null<hscript.Expr>;
 	public function new() 
 	{
 		

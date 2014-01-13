@@ -50,25 +50,3 @@ enum Token
 	//times;
 	
 }
-//class Token
-//{
-	//public var type:TokenType;
-	//public var data:Dynamic;
-	//public function new(type:TokenType, data:String) 
-	//{
-		//this.type = type;
-		//switch(type) {
-			//case TokenType.TNumber:
-				//this.data = Std.parseFloat(data);
-			//case TokenType.TConst_math, TokenType.TScript:
-				//var parser:Parser = new Parser();
-				//this.data = parser.parseString(data);
-			//default:
-				//this.data = data;
-		//}
-	//}
-	//public function toString():String {
-		//return '$type = $data';
-	//}
-	//
-//}
