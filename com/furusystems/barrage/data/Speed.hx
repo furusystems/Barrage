@@ -1,5 +1,4 @@
 package com.furusystems.barrage.parser;
-import com.furusystems.barrage.parser.Speed.SpeedType;
 
 /**
  * ...

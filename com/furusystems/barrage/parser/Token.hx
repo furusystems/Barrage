@@ -1,6 +1,4 @@
 package com.furusystems.barrage.parser;
-import hscript.Parser;
-
 /**
  * ...
  * @author Andreas Rønning

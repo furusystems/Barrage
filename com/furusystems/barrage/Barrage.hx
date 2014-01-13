@@ -2,9 +2,7 @@ package com.furusystems.barrage;
 import com.furusystems.barrage.Barrage;
 import com.furusystems.barrage.data.ActionDef;
 import com.furusystems.barrage.data.BulletDef;
-import com.furusystems.barrage.data.Orientation;
 import com.furusystems.barrage.data.RunningAction;
-import com.furusystems.barrage.parser.Parser;
 import haxe.ds.Vector;
 
 /**
