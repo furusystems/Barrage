@@ -18,11 +18,10 @@ class Barrage
 	var actions:Vector<ActionDef>;
 	var bullets:Vector<BulletDef>;
 	public var name:String;
-	public var orientation:Orientation;
 	public function new() {
 	}
 	public function toString():String {
-		return 'Barrage($name, $orientation)';
+		return 'Barrage($name)';
 	}
 	public inline function getAction(def:ActionDef):RunningAction {
 		return new RunningAction(def);
