@@ -22,7 +22,7 @@ enum Token
 	TWait;
 	TRepeat;
 	
-	TSequential;
+	TIncremental;
 	TAbsolute;
 	TAimed;
 	TRelative;
