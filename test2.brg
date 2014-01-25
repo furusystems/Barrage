@@ -1,0 +1,13 @@
+barrage called winder
+	bullet called winderBullet
+		speed is 3
+
+	action called roundWinder
+		fire winderBullet at absolute speed mySpeed in absolute direction myDirection
+		repeat 10 times
+
+	action called start
+		do roundWinder
+			mySpeed is 50
+			myDirection is 21
+

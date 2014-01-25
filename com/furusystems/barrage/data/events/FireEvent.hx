@@ -17,21 +17,19 @@ class FireEvent extends EventDef
 	public var speed:Speed;
 	public var acceleration:Acceleration;
 	public var direction:Direction;
-	public function new(triggerTime:Float) 
+	public function new() 
 	{
-		super(triggerTime);
+		super();
 		type = EventType.FIRE;
 	}
 	override public function trigger(runningAction:RunningAction, runningBarrage:RunningBarrage):Void 
 	{
+		runningAction.currentBullet = runningBarrage.fire(runningAction, this, bulletID);
 		if (bulletID != -1) {
 			var bd = runningBarrage.owner.bullets[bulletID];
-			trace("Fire " + bd.name);
 			if (bd.action != -1) {
-				runningBarrage.runActionByID(bd.action);
+				var action = runningBarrage.runActionByID(runningAction, bd.action, runningAction.currentBullet);
 			}
-		}else {
-			trace("Fire anonymous bullet");
 		}
 	}
 	

@@ -8,5 +8,7 @@
   "releasenote": "",
   "contributors": [""],
   "dependencies": {
+	  "hscript":"",
+	  "actuate":""
   }
 }

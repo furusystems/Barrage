@@ -1,46 +1,1 @@
-# Comments are prefixed with pound sign
-
-# A barrage has an abstract origin defined by the implementation
-# It represents a starting action that results in bullets being created
-# Actions can have sub-actions, and bullets themselves have individual actions with sub-actions
-# Actions triggered by bullets use the bullet's position as origin
-
-# First define the base identity of this barrage
-barrage called boss_grow_bullets
-	# Define and name a bullet
-	# bullets can be left anonymous if no referencing is required
-	bullet called seed
-		# initial properties are speed and acceleration. Acceleration defaults to flat rate.
-		speed is 1.2
-		direction is 40
-		acceleration is 0
-		# do blocks trigger an action
-		# action block elements take place in sequence, temporally separated with wait blocks
-		do action
-			# speed and acceleration are common bullet properties
-			# "over" keyword allows for temporal spread
-			set speed to 0 over 60 frames
-			# frames and seconds are valid values
-			wait 60 frames
-			# "fire" blocks take a named bullet or an anonymous "bullet"
-			# "at TYPE speed" and "in TYPE direction" properties allow bullet property override
-			fire bullet at absolute speed 0.75
-			do action
-				fire bullet at incremental speed 0.15
-				# all commands in parentheses are parsed to hscript and interpreted at runtime
-				# if no variables are used, the script is executed at compile time into a constant
-				# repeat blocks cause actions to retrigger (duh)
-				repeat (4 * difficulty * 4) times
-			# die block causes a bullet to immediately die
-			die
-
-	# Define the starting action (barrage invalid if undefined)
-	# named actions are manually predefined
-	action called start
-		# fire a named bullet
-		fire seed in absolute direction (270 - 4 + difficulty * 6 * 15 * 0.5)
-		# anonymous actions are hoisted by the parser and given a unique ID internally for reuse
-		# do action
-			# incremental direction applies a flat modifier to the previous direction used within this action
-			fire seed in incremental direction 15 
-			repeat (4 + difficulty * 6) times
+barrage called swarm	bullet called homer		do action			set speed to 0 over 1 seconds			set direction to aimed over 1 seconds			wait 0.6 seconds			set speed to 400 over 1 seconds	bullet called seed		speed is 180		direction is 40		acceleration is 0		do action			set speed to 0 over 60 frames			wait 60 frames			do action				fire homer at absolute speed (20+Math.random()*80) in absolute direction (Math.random()*360)				repeat 4 times			die	action called start		fire seed in aimed direction -30		do action			fire seed in incremental direction 15 			repeat 5 times

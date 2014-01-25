@@ -1,0 +1,13 @@
+barrage called boss_grow_bullets
+	bullet called seed
+		speed is 80
+		direction is 40
+		acceleration is 0
+		do action
+			wait 2 seconds
+			die
+	action called start
+		fire seed in absolute direction -30
+		do action
+			fire seed in incremental direction 15
+			repeat 5 times

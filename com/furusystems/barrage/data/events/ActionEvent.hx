@@ -10,14 +10,14 @@ import com.furusystems.barrage.instancing.RunningAction;
 class ActionEvent extends EventDef
 {
 	public var actionID:Int = -1;
-	public function new(triggerTime:Float) 
+	public function new() 
 	{
-		super(triggerTime);
+		super();
 		type = EventType.ACTION;
 	}
 	override public function trigger(runningAction:RunningAction, runningBarrage:RunningBarrage):Void 
 	{
-		runningBarrage.runActionByID(actionID);
+		runningBarrage.runActionByID(runningAction, actionID);
 	}
 	
 }

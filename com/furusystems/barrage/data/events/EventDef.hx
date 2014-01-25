@@ -18,11 +18,9 @@ enum EventType {
 }
 class EventDef
 {
-	public var triggerTime:Float = 0;
 	public var type:EventType;
-	public function new(triggerTime:Float) 
+	public function new() 
 	{
-		this.triggerTime = triggerTime;
 	}
 	public function trigger(runningAction:RunningAction, runningBarrage:RunningBarrage):Void {
 		throw "Not implemented";

@@ -14,14 +14,28 @@ class Wait extends EventDef
 	public var waitTimeScript:Expr;
 	public var scripted:Bool = false;
 	public var durationType:DurationType;
-	public function new(triggerTime:Float) 
+	public function new() 
 	{
-		super(triggerTime);
+		super();
 		type = EventType.WAIT;
 	}
 	override public function trigger(runningAction:RunningAction, runningBarrage:RunningBarrage):Void 
 	{
-		trace("Wait");
+		var sleepTimeNum:Float;
+		if (scripted) {
+			sleepTimeNum = runningBarrage.owner.executor.execute(waitTimeScript);
+		}else {
+			sleepTimeNum = waitTime;
+		}
+		switch(durationType) {
+			case SECONDS:
+				runningAction.sleepTime = sleepTimeNum;
+			case FRAMES:
+				runningAction.sleepTime = (sleepTimeNum * 1 / runningBarrage.owner.frameRate);
+		}
+		#if debug
+		trace("Wait " + sleepTimeNum + " " + durationType + " = " + runningAction.sleepTime + " seconds");
+		#end
 	}
 	
 }

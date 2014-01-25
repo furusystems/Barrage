@@ -10,14 +10,17 @@ import com.furusystems.barrage.instancing.RunningAction;
 class DieEvent extends EventDef
 {
 
-	public function new(triggerTime:Float) 
+	public function new() 
 	{
-		super(triggerTime);
+		super();
 		type = EventType.DIE;
 	}
 	override public function trigger(runningAction:RunningAction, runningBarrage:RunningBarrage):Void 
 	{
+		#if debug
 		trace("Die");
+		#end
+		runningBarrage.emitter.kill(runningAction.triggeringBullet);
 	}
 	
 }

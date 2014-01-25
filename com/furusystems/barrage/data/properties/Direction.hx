@@ -1,21 +1,16 @@
 package com.furusystems.barrage.data.properties;
+import com.furusystems.barrage.instancing.RunningAction;
+import com.furusystems.barrage.instancing.RunningBarrage;
+import com.furusystems.flywheel.math.MathUtils;
 
 /**
  * ...
  * @author Andreas Rønning
  */
-enum DirectionType {
-	ABSOLUTE;
-	INCREMENTAL;
-	RELATIVE;
-	AIMED;
-}
 class Direction extends Property
 {
-	public var type:DirectionType;
 	public function new() 
 	{
-		type = ABSOLUTE;
 		super();
 	}
 	
