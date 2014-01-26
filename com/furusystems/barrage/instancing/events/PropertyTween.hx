@@ -40,9 +40,10 @@ class PropertyTween implements ITriggerableEvent
 		}
 		if (def.direction != null) {
 			if (def.direction.isAimed) {
+				var currentAngle:Float = runningAction.currentBullet.angle;
 				var ang = runningBarrage.emitter.getAngleToPlayer(runningAction.currentBullet.pos);
-				while (ang > 180) ang -= 360;
-				while (ang < -180) ang += 360;
+				while (ang - currentAngle > 180) ang -= 360;
+				while (ang - currentAngle < -180) ang += 360;
 				
 				props.angle = ang;
 			}else {
