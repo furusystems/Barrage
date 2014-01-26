@@ -123,11 +123,11 @@ class RunningBarrage
 	}
 	
 	inline function getOrigin(action:RunningAction):IOrigin {
-		if (action.currentBullet == null) {
+		if (action.triggeringBullet == null) {
 			if (action.callingAction != null) return getOrigin(action.callingAction);
 			return emitter;
 		}
-		else return action.currentBullet;
+		else return action.triggeringBullet;
 	}
 	
 	public function fire(action:RunningAction, event:FireEvent, bulletID:Int):IBullet 

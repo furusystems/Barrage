@@ -42,7 +42,11 @@ class PropertyTween extends PropertySet
 		}
 		if (direction != null) {
 			if (direction.isAimed) {
-				props.angle = runningBarrage.emitter.getAngleToPlayer(runningAction.currentBullet.pos);
+				var ang = runningBarrage.emitter.getAngleToPlayer(runningAction.currentBullet.pos);
+				while (ang > 180) ang -= 360;
+				while (ang < -180) ang += 360;
+				
+				props.angle = ang;
 			}else {
 				props.angle = direction.get(runningBarrage, runningAction);
 			}

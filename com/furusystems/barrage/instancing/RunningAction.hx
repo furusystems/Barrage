@@ -91,7 +91,6 @@ class RunningAction
 	}
 	public inline function exit(runner:RunningBarrage) {
 		currentBullet = null;
-		//trace("End action " + def.name + ":" + def.id);
 	}
 	
 }

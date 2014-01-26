@@ -8,7 +8,6 @@ interface IBullet extends IOrigin
 {
 	var acceleration:Float;
 	var velocity:Vector2D;
-	var angleRad:Float;
 	var angle:Float;
 	var speed:Float;
 	var active:Bool;
