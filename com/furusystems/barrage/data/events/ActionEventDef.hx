@@ -1,23 +1,19 @@
 package com.furusystems.barrage.data.events;
+import com.furusystems.barrage.data.EventDef;
 import com.furusystems.barrage.instancing.RunningBarrage;
-import com.furusystems.barrage.data.events.EventDef;
 import com.furusystems.barrage.instancing.RunningAction;
 
 /**
  * ...
  * @author Andreas Rønning
  */
-class ActionEvent extends EventDef
+class ActionEventDef extends EventDef
 {
 	public var actionID:Int = -1;
 	public function new() 
 	{
 		super();
 		type = EventType.ACTION;
-	}
-	override public function trigger(runningAction:RunningAction, runningBarrage:RunningBarrage):Void 
-	{
-		runningBarrage.runActionByID(runningAction, actionID);
 	}
 	
 }

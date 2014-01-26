@@ -1,5 +1,5 @@
 package com.furusystems.barrage.data;
-import com.furusystems.barrage.data.events.EventDef;
+import com.furusystems.barrage.data.EventDef;
 import com.furusystems.barrage.data.properties.Property;
 /**
  * ...

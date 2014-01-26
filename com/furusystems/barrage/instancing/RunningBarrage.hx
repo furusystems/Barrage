@@ -2,10 +2,8 @@ package com.furusystems.barrage.instancing;
 import com.furusystems.barrage.Barrage;
 import com.furusystems.barrage.data.ActionDef;
 import com.furusystems.barrage.data.BulletDef;
-import com.furusystems.barrage.data.events.EventDef;
-import com.furusystems.barrage.data.events.EventDef.EventType;
-import com.furusystems.barrage.data.events.FireEvent;
 import com.furusystems.barrage.data.properties.Property;
+import com.furusystems.barrage.instancing.events.FireEvent;
 import com.furusystems.barrage.instancing.IOrigin;
 import com.furusystems.flywheel.events.Signal1.Signal1;
 import com.furusystems.flywheel.geom.Vector2D;
@@ -37,13 +35,7 @@ class RunningBarrage
 		this.owner = owner;
 		bullets = [];
 		activeActions = [];
-		//allActions = new Vector<RunningAction>(owner.actions.length);
-		for (i in 0...owner.actions.length) {
-			//allActions[i] = new RunningAction(this, owner.actions[i]);
-			if (owner.actions[i] == owner.start) {
-				initAction = new RunningAction(this, owner.actions[i]);
-			}
-		}
+		initAction = new RunningAction(this, owner.start);
 	}
 	public function start():Void {
 		time = 0;
@@ -149,14 +141,14 @@ class RunningBarrage
 		var lastDirection = action.prevAngle;
 		var lastAcceleration = action.prevAccel;
 		
-		if (event.speed != null) {
-			baseSpeed = applyProperty(false, baseSpeed, lastSpeed, event.speed, this, action);
+		if (event.def.speed != null) {
+			baseSpeed = applyProperty(false, baseSpeed, lastSpeed, event.def.speed, this, action);
 		}
-		if (event.acceleration != null) {
-			baseAccel = applyProperty(false, baseAccel, lastAcceleration, event.acceleration, this, action);
+		if (event.def.acceleration != null) {
+			baseAccel = applyProperty(false, baseAccel, lastAcceleration, event.def.acceleration, this, action);
 		}
-		if (event.direction != null) {
-			baseDirection = applyProperty(true, baseDirection, lastDirection, event.direction, this, action);
+		if (event.def.direction != null) {
+			baseDirection = applyProperty(true, baseDirection, lastDirection, event.def.direction, this, action);
 		}
 		
 		

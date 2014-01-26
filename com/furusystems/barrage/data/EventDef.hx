@@ -1,4 +1,4 @@
-package com.furusystems.barrage.data.events;
+package com.furusystems.barrage.data;
 import com.furusystems.barrage.Barrage;
 import com.furusystems.barrage.data.ActionDef;
 import com.furusystems.barrage.instancing.RunningAction;
@@ -21,9 +21,6 @@ class EventDef
 	public var type:EventType;
 	public function new() 
 	{
-	}
-	public function trigger(runningAction:RunningAction, runningBarrage:RunningBarrage):Void {
-		throw "Not implemented";
 	}
 	
 }

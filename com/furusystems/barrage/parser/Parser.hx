@@ -3,21 +3,19 @@ import com.furusystems.barrage.Barrage;
 import com.furusystems.barrage.data.ActionDef;
 import com.furusystems.barrage.data.BarrageItemDef;
 import com.furusystems.barrage.data.BulletDef;
-import com.furusystems.barrage.data.events.ActionEvent;
-import com.furusystems.barrage.data.events.DieEvent;
-import com.furusystems.barrage.data.events.DurationType;
-import com.furusystems.barrage.data.events.EventDef;
-import com.furusystems.barrage.data.events.FireEvent;
-import com.furusystems.barrage.data.events.PropertySet;
-import com.furusystems.barrage.data.events.PropertyTween;
-import com.furusystems.barrage.data.events.Wait;
+import com.furusystems.barrage.data.events.ActionEventDef;
+import com.furusystems.barrage.data.events.DieEventDef;
+import com.furusystems.barrage.data.events.FireEventDef;
+import com.furusystems.barrage.data.events.PropertySetDef;
+import com.furusystems.barrage.data.events.PropertyTweenDef;
+import com.furusystems.barrage.data.events.WaitDef;
 import com.furusystems.barrage.data.properties.Acceleration;
 import com.furusystems.barrage.data.properties.Direction;
+import com.furusystems.barrage.data.properties.DurationType;
 import com.furusystems.barrage.data.properties.Property;
 import com.furusystems.barrage.data.properties.Speed;
 import com.furusystems.barrage.parser.Parser.Block;
 import com.furusystems.barrage.parser.Token;
-import haxe.ds.Vector;
 import hscript.Expr;
 import hscript.Interp;
 
@@ -140,7 +138,7 @@ class Parser
 		if(parent!=null){
 			if (Std.is(parent, ActionDef)) {
 				//parent is action
-				var event:ActionEvent = new ActionEvent();
+				var event = new ActionEventDef();
 				event.actionID = ad.id;
 				parent.events.push(event);
 			}else {
@@ -442,7 +440,7 @@ class Parser
 	static inline function runVanish(b:Block) 
 	{
 		var ad:ActionDef = cast currentElement();
-		ad.events.push(new DieEvent());
+		ad.events.push(new DieEventDef());
 	}
 	
 	static inline function runRepeat(b:Block) 
@@ -471,7 +469,7 @@ class Parser
 				throw new ParseError(b.lineNo, "Invalid fire statement");
 		}
 		
-		var event:FireEvent = new FireEvent();
+		var event = new FireEventDef();
 		
 		if (!anon) {
 			event.bulletID = bulletIdMap.get(b.values[1]);
@@ -531,7 +529,7 @@ class Parser
 	
 	static inline function runWait(b:Block) 
 	{
-		var event = new Wait();
+		var event = new WaitDef();
 		switch(b.tokens[1]) {
 			case TNumber | TConst_math:
 				event.waitTime = b.values[1];
@@ -558,8 +556,8 @@ class Parser
 		var target:String = "";
 		var value:Null<Dynamic>;
 		var event:Dynamic = null;
-		if (overTime) event = new PropertyTween();
-		else event = new PropertySet();
+		if (overTime) event = new PropertyTweenDef();
+		else event = new PropertySetDef();
 		
 		var p:Property = null;
 		switch(b.tokens[1]) {

@@ -1,7 +1,8 @@
 package com.furusystems.barrage.instancing;
 import com.furusystems.barrage.data.ActionDef;
-import com.furusystems.barrage.data.events.EventDef.EventType;
-import com.furusystems.barrage.instancing.Event;
+import com.furusystems.barrage.data.EventDef.EventType;
+import com.furusystems.barrage.instancing.events.EventFactory;
+import com.furusystems.barrage.instancing.events.ITriggerableEvent;
 import com.furusystems.barrage.instancing.RunningBarrage;
 import haxe.ds.Vector;
 
@@ -12,7 +13,7 @@ import haxe.ds.Vector;
 class RunningAction
 {
 	public var def:ActionDef;
-	public var events:Vector<Event>;
+	public var events:Vector<ITriggerableEvent>;
 	public var sleepTime:Float;
 	public var currentBullet:IBullet;
 	public var triggeringBullet:IBullet;
@@ -27,7 +28,7 @@ class RunningAction
 	{
 		this.def = def;
 		
-		prevAngle = prevSpeed = prevAccel = 0;
+		prevAngle = prevSpeed = prevAccel = sleepTime = 0;
 		
 		//#if debug
 		//var repeatCount = def.events.length;
@@ -35,10 +36,10 @@ class RunningAction
 		var repeatCount:Int = cast def.repeatCount.get(runningBarrage, this);
 		repeatCount *= def.events.length;
 		//#end
-		events = new Vector<Event>(repeatCount);
+		events = new Vector<ITriggerableEvent>(repeatCount);
 		var idx:Int = 0;
 		for (i in 0...repeatCount) {
-			events[i] = new Event(def.events[idx]);
+			events[i] = EventFactory.create(def.events[idx]);
 			idx++;
 			if (idx == def.events.length) idx = 0;
 		}
@@ -50,37 +51,36 @@ class RunningAction
 		}
 		currentBullet = null;
 	}
-	public function update(runningBarrage:RunningBarrage, delta:Float) {
+	public inline function update(runningBarrage:RunningBarrage, delta:Float) {
 		//trace("Update: " + delta);
 		sleepTime -= delta;
-		if (sleepTime > 0) {
-			return;
-		}
-		var runEvents:Int = 0;
-		for (i in 0...events.length) {
-			var e = events[i];
-			if (e.hasRun) {
+		if (sleepTime <= 0) {
+			var runEvents:Int = 0;
+			for (i in 0...events.length) {
+				var e = events[i];
+				if (e.hasRun) {
+					runEvents++;
+					continue;
+				}
+				//trace(e.def.type);
+				runEvent(runningBarrage, e);
 				runEvents++;
-				continue;
+				if (e.getType() == EventType.WAIT) {
+					//trace("Breaking for wait");
+					break;
+				}
 			}
-			//trace(e.def.type);
-			runEvent(runningBarrage, e);
-			runEvents++;
-			if (e.def.type == EventType.WAIT) {
-				//trace("Breaking for wait");
-				return;
+			if (runEvents == events.length) {
+				//trace("Ending action");
+				runningBarrage.stopAction(this);
 			}
-		}
-		if (runEvents == events.length) {
-			//trace("Ending action");
-			runningBarrage.stopAction(this);
 		}
 	}
 	
-	inline function runEvent(runningBarrage:RunningBarrage, e:Event) 
+	inline function runEvent(runningBarrage:RunningBarrage, e:ITriggerableEvent) 
 	{
 		e.hasRun = true;
-		e.def.trigger(this, runningBarrage);
+		e.trigger(this, runningBarrage);
 	}
 	
 	public inline function enter(callingAction:RunningAction, runner:RunningBarrage) 
