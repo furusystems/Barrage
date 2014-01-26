@@ -10,11 +10,8 @@ import com.furusystems.barrage.data.events.FireEventDef;
 import com.furusystems.barrage.data.events.PropertySetDef;
 import com.furusystems.barrage.data.events.PropertyTweenDef;
 import com.furusystems.barrage.data.events.WaitDef;
-import com.furusystems.barrage.data.properties.Acceleration;
-import com.furusystems.barrage.data.properties.Direction;
 import com.furusystems.barrage.data.properties.DurationType;
 import com.furusystems.barrage.data.properties.Property;
-import com.furusystems.barrage.data.properties.Speed;
 import com.furusystems.barrage.parser.Parser.Block;
 import com.furusystems.barrage.parser.Token;
 import hscript.Expr;
@@ -515,7 +512,7 @@ class Parser
 		
 		
 		if (speed != null) {
-			event.speed = new Speed();
+			event.speed = new Property("Speed");
 			switch(speedType) {
 				case TRelative:
 					event.speed.modifier = RELATIVE;
@@ -533,7 +530,7 @@ class Parser
 			
 		}
 		if (direction != null) {
-			event.direction = new Direction();
+			event.direction = new Property("Direction");
 			switch(directionType) {
 				case TAbsolute:
 					event.direction.modifier = ABSOLUTE;
@@ -592,11 +589,11 @@ class Parser
 		var p:Property = null;
 		switch(b.tokens[1]) {
 			case TSpeed:
-				p = event.speed = new Speed();
+				p = event.speed = new Property("Speed");
 			case TDirection:
-				p = event.direction = new Direction();
+				p = event.direction = new Property("Direction");
 			case TAcceleration:
-				p = event.acceleration = new Acceleration();
+				p = event.acceleration = new Property("Acceleration");
 			default:
 				throw new ParseError(b.lineNo, "Invalid property");
 		}
