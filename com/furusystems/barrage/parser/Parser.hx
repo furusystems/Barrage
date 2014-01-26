@@ -213,8 +213,12 @@ class Parser
 	
 	static inline function toLines(stringLines:Array<String>):Array<Line> {
 		var out = new Array<Line>();
+		var count:Int = 0;
 		for (i in 0...stringLines.length) {
-			out[i] = toLine(i, stringLines[i]);
+			var trim = StringTools.trim(stringLines[i]);
+			if (trim.length == 0) continue;
+			out[count] = toLine(count, stringLines[i]);
+			count++;
 		}
 		log("Generated lines: "+out.length);
 		return out;
@@ -430,7 +434,7 @@ class Parser
 			case [TVanish]:
 				runVanish(b);
 			default:
-				throw new ParseError(b.lineNo, "Unrecognized line " + b.lineNo + ' "' + b.tokens + '"');
+				throw new ParseError(b.lineNo, "Unrecognized line " + b.lineNo + ' "' + b.tokens + '" raw: '+b.raw);
 		}
 		
 	}

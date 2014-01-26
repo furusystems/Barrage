@@ -1,0 +1,13 @@
+barrage called spirals
+	bullet called fastbullet
+		speed is 150
+
+	action called start
+		fire fastbullet in absolute direction 0
+		do action
+			do action
+				fire fastbullet in incremental direction (360/31)
+				wait 5 frames
+				repeat 32 times
+			wait 10 frames
+			repeat 5 times
