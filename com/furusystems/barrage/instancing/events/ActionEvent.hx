@@ -19,7 +19,7 @@ class ActionEvent implements ITriggerableEvent
 	}
 	public inline function trigger(runningAction:RunningAction, runningBarrage:RunningBarrage):Void 
 	{
-		runningBarrage.runActionByID(runningAction, def.actionID);
+		runningBarrage.runActionByID(runningAction, def.actionID, runningAction.triggeringBullet);
 	}
 	public inline function getType():EventType {
 		return def.type;

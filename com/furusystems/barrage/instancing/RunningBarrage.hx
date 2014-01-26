@@ -4,6 +4,7 @@ import com.furusystems.barrage.data.BulletDef;
 import com.furusystems.barrage.data.properties.Property;
 import com.furusystems.barrage.instancing.events.FireEvent;
 import com.furusystems.barrage.instancing.IOrigin;
+import com.furusystems.flywheel.events.Signal1.Signal1;
 import com.furusystems.flywheel.geom.Vector2D;
 
 /**
@@ -18,6 +19,8 @@ class RunningBarrage
 	public var activeActions:Array<RunningAction>;
 	public var time:Float = 0;
 	
+	public var onComplete:Signal1<RunningBarrage>;
+	
 	public var lastBulletFired:IBullet;
 	
 	var bullets:Array<IBullet>;
@@ -27,15 +30,16 @@ class RunningBarrage
 	
 	public function new(emitter:IBulletEmitter, owner:Barrage) 
 	{
+		onComplete = new Signal1<RunningBarrage>();
 		this.emitter = emitter;
 		this.owner = owner;
 		bullets = [];
 		activeActions = [];
-		initAction = new RunningAction(this, owner.start);
 	}
 	public function start():Void {
 		time = 0;
-		runAction(null, initAction);
+		owner.executor.variables.set("barragetime", time);
+		runAction(null, new RunningAction(this, owner.start));
 		started = true;
 	}
 	public function stop():Void {
@@ -48,8 +52,14 @@ class RunningBarrage
 		if (!started) return;
 		time += delta;
 		lastDelta = delta;
+		
+		owner.executor.variables.set("barragetime", time);
 		for (a in activeActions) {
 			a.update(this, delta);
+		}
+		if (activeActions.length == 0) {
+			stop();
+			onComplete.dispatch(this);
 		}
 	}
 	public inline function runActionByID(triggerAction:RunningAction, id:Int, ?triggerBullet:IBullet):RunningAction {
@@ -153,7 +163,7 @@ class RunningBarrage
 		action.prevAccel = baseAccel;
 		
 		
-		lastBulletFired = emitter.emit(origin.pos, baseDirection, baseSpeed, baseAccel);
+		lastBulletFired = emitter.emit(origin.pos, baseDirection, baseSpeed, baseAccel, lastDelta);
 		lastBulletFired.speed = baseSpeed;
 		lastBulletFired.angle = baseDirection;
 		return lastBulletFired;

@@ -1,13 +1,13 @@
-barrage called spirals
-	bullet called fastbullet
-		speed is 150
+barrage called trianglespray
+	bullet called slowbullet
+		speed is 20
+		do action
+			set speed to 100 over 1 seconds
 
 	action called start
-		fire fastbullet in absolute direction 0
+		fire slowbullet in aimed direction 0
+		wait 1 frames
 		do action
-			do action
-				fire fastbullet in incremental direction (360/31)
-				wait 5 frames
-				repeat 32 times
-			wait 10 frames
-			repeat 5 times
+			fire slowbullet in incremental direction (triangle(repeatCount/20*3)*10) at incremental speed 5
+			wait 1 frames
+			repeat 60 times

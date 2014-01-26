@@ -36,24 +36,38 @@ class PropertyTween implements ITriggerableEvent
 		}
 		var props:Dynamic = { };
 		if (def.speed != null) {
-			props.speed = def.speed.get(runningBarrage, runningAction);
-		}
-		if (def.direction != null) {
-			if (def.direction.isAimed) {
-				var currentAngle:Float = runningAction.currentBullet.angle;
-				var ang = runningBarrage.emitter.getAngleToPlayer(runningAction.currentBullet.pos);
-				while (ang - currentAngle > 180) ang -= 360;
-				while (ang - currentAngle < -180) ang += 360;
-				
-				props.angle = ang;
+			if (def.relative) {
+				props.speed = runningAction.currentBullet.speed + def.speed.get(runningBarrage, runningAction);
 			}else {
-				props.angle = def.direction.get(runningBarrage, runningAction);
+				props.speed = def.speed.get(runningBarrage, runningAction);
 			}
 		}
-		if (def.acceleration != null) {
-			props.acceleration = def.acceleration.get(runningBarrage, runningAction);
+		if (def.direction != null) {
+			var ang:Float = 0;
+			if (def.direction.isAimed) {
+				var currentAngle:Float = runningAction.currentBullet.angle;
+				ang = runningBarrage.emitter.getAngleToPlayer(runningAction.currentBullet.pos);
+				while (ang - currentAngle > 180) ang -= 360;
+				while (ang - currentAngle < -180) ang += 360;
+			}else {
+				ang = def.direction.get(runningBarrage, runningAction);
+			}
+			if (def.relative) {
+				props.angle = runningAction.currentBullet.angle + ang;
+			}else {
+				props.angle = ang;
+			}
+			
 		}
-		Actuate.tween(runningAction.currentBullet, tweenTimeNum, props).ease(Linear.easeNone);
+		if (def.acceleration != null) {
+			var accel = def.acceleration.get(runningBarrage, runningAction);
+			if (def.relative) {
+				props.acceleration = runningAction.currentBullet.acceleration + accel;
+			}else {
+				props.acceleration = accel;
+			}
+		}
+		Actuate.tween(runningAction.currentBullet, tweenTimeNum, props,false).ease(Linear.easeNone);
 	}
 	public inline function getType():EventType {
 		return def.type;

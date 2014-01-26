@@ -21,6 +21,7 @@ enum Token
 	TAcceleration;
 	TWait;
 	TRepeat;
+	TIncrement;
 	
 	TIncremental;
 	TAbsolute;

@@ -30,10 +30,26 @@ class Barrage
 		frameRate = 60; //default
 		executor = new Interp();
 		executor.variables.set("math", Math);
+		executor.variables.set("triangle", tri);
+		executor.variables.set("square", sqr);
 		difficulty = 1;
 		actions = [];
 		bullets = [];
 	}
+	function tri(x:Float, a:Float = 0.5):Float
+	{
+		x = x / (2.0*Math.PI);
+		x = x % 1.0;
+		if( x<0.0 ) x = 1.0+x;
+		if(x<a) x=x/a; else x=1.0-(x-a)/(1.0-a);
+		return -1.0+2.0*x;
+	}
+	function sqr(x:Float, a:Float = 0.5):Float
+	{
+		if( Math.sin(x)>a ) x=1.0; else x=-1.0;
+		return x;
+	}
+	
 	inline function set_difficulty(i:Int):Int {
 		executor.variables.set("difficulty", i);
 		return i;

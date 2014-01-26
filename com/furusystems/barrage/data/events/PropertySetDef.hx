@@ -13,6 +13,7 @@ class PropertySetDef extends EventDef
 	public var speed:Speed;
 	public var direction:Direction;
 	public var acceleration:Acceleration;
+	public var relative:Bool;
 	public function new() 
 	{
 		super();

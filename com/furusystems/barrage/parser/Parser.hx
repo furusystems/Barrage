@@ -299,7 +299,7 @@ class Parser
 			return TNumber;
 		}
 		switch(data) {
-			case "called", "then", "is","to","times":
+			case "called", "then", "is","to","times","by":
 				return TIgnored;
 			case "horizontal":
 				return THorizontal;
@@ -317,6 +317,8 @@ class Parser
 				return TAcceleration;
 			case "script":
 				return TScript;
+			case "increment":
+				return TIncrement;
 			case "incremental"|"sequential":
 				return TIncremental;
 			case "direction":
@@ -411,10 +413,11 @@ class Parser
 		switch(b.tokens) {
 			case [TSpeed | TDirection | TAcceleration, TNumber | TConst_math | TScript]:
 				runPropertyInit(b);
-			case [TSet, TSpeed | TDirection | TAcceleration, TNumber | TConst_math | TScript | TAimed]:
-				runPropertySet(b);
-			case [TSet, TSpeed | TDirection | TAcceleration, TNumber|TConst_math|TScript|TAimed, TOver, TNumber|TConst_math|TScript, TSeconds | TFrames]:
-				runPropertySet(b,true);
+				
+			case [TSet|TIncrement, TSpeed | TDirection | TAcceleration, TNumber | TConst_math | TScript | TAimed]:
+				runPropertySet(b, false, b.tokens[0] == TIncrement);
+			case [TSet|TIncrement, TSpeed | TDirection | TAcceleration, TNumber|TConst_math|TScript|TAimed, TOver, TNumber|TConst_math|TScript, TSeconds | TFrames]:
+				runPropertySet(b, true, b.tokens[0] == TIncrement);
 			case [TWait, TNumber|TConst_math|TScript, TFrames | TSeconds]:
 				runWait(b);
 			case [TDo, TIdentifier]:
@@ -556,12 +559,14 @@ class Parser
 		//trace("Wait for " + b.values[1] + " " + b.tokens[2]);
 	}
 	
-	static inline function runPropertySet(b:Block,overTime:Bool = false) {
+	static inline function runPropertySet(b:Block,overTime:Bool = false, relative:Bool = false) {
 		var target:String = "";
 		var value:Null<Dynamic>;
 		var event:Dynamic = null;
 		if (overTime) event = new PropertyTweenDef();
 		else event = new PropertySetDef();
+		
+		event.relative = relative;
 		
 		var p:Property = null;
 		switch(b.tokens[1]) {

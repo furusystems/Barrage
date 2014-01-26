@@ -26,17 +26,33 @@ class PropertySet implements ITriggerableEvent
 		
 		var props:Dynamic = { };
 		if (def.speed != null) {
-			props.speed = def.speed.get(runningBarrage, runningAction);
-		}
-		if (def.direction != null) {
-			if (def.direction.isAimed) {
-				props.angle = runningBarrage.emitter.getAngleToPlayer(runningAction.currentBullet.pos);
+			if (def.relative) {
+				props.speed = runningAction.currentBullet.speed + def.speed.get(runningBarrage, runningAction);
 			}else {
-				props.angle = def.direction.get(runningBarrage, runningAction);
+				props.speed = def.speed.get(runningBarrage, runningAction);
 			}
 		}
+		if (def.direction != null) {
+			var ang:Float = 0;
+			if (def.direction.isAimed) {
+				ang = runningBarrage.emitter.getAngleToPlayer(runningAction.currentBullet.pos);
+			}else {
+				ang = def.direction.get(runningBarrage, runningAction);
+			}
+			if (def.relative) {
+				props.angle = runningAction.currentBullet.angle + ang;
+			}else {
+				props.angle = ang;
+			}
+			
+		}
 		if (def.acceleration != null) {
-			props.acceleration = def.acceleration.get(runningBarrage, runningAction);
+			var accel = def.acceleration.get(runningBarrage, runningAction);
+			if (def.relative) {
+				props.acceleration = runningAction.currentBullet.acceleration + accel;
+			}else {
+				props.acceleration = accel;
+			}
 		}
 		Actuate.tween(runningAction.currentBullet, 0, props);
 	}
