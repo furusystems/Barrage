@@ -5,7 +5,6 @@ import com.furusystems.barrage.data.BulletDef;
 import com.furusystems.barrage.instancing.IBulletEmitter;
 import com.furusystems.barrage.instancing.RunningBarrage;
 import com.furusystems.barrage.parser.Parser;
-import haxe.ds.Vector;
 import hscript.Interp;
 
 /**

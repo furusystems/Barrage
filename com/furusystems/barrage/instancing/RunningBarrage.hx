@@ -1,14 +1,10 @@
 package com.furusystems.barrage.instancing;
 import com.furusystems.barrage.Barrage;
-import com.furusystems.barrage.data.ActionDef;
 import com.furusystems.barrage.data.BulletDef;
 import com.furusystems.barrage.data.properties.Property;
 import com.furusystems.barrage.instancing.events.FireEvent;
 import com.furusystems.barrage.instancing.IOrigin;
-import com.furusystems.flywheel.events.Signal1.Signal1;
 import com.furusystems.flywheel.geom.Vector2D;
-import com.furusystems.flywheel.math.MathUtils;
-import haxe.ds.Vector.Vector;
 
 /**
  * ...

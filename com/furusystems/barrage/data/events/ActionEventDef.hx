@@ -1,7 +1,5 @@
 package com.furusystems.barrage.data.events;
 import com.furusystems.barrage.data.EventDef;
-import com.furusystems.barrage.instancing.RunningBarrage;
-import com.furusystems.barrage.instancing.RunningAction;
 
 /**
  * ...

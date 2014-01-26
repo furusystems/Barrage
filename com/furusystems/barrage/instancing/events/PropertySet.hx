@@ -2,11 +2,8 @@ package com.furusystems.barrage.instancing.events;
 import com.furusystems.barrage.data.EventDef;
 import com.furusystems.barrage.data.events.PropertySetDef;
 import com.furusystems.barrage.instancing.events.ITriggerableEvent;
-import com.furusystems.barrage.instancing.RunningBarrage;
-import com.furusystems.barrage.data.properties.Acceleration;
-import com.furusystems.barrage.data.properties.Direction;
-import com.furusystems.barrage.data.properties.Speed;
 import com.furusystems.barrage.instancing.RunningAction;
+import com.furusystems.barrage.instancing.RunningBarrage;
 import motion.Actuate;
 
 /**
