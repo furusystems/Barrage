@@ -1,0 +1,40 @@
+{
+        "scope": "source.brg",
+
+        "completions":
+        [
+         	{ "trigger": "barrage", "contents": "barrage called $0" },
+         	{ "trigger": "called", "contents": "called $0" },
+         	{ "trigger": "is", "contents": "is $0" },
+         	{ "trigger": "over", "contents": "over $0" },
+			"times",
+			"speed",
+         	{ "trigger": "fire", "contents": "fire $0" },
+         	{ "trigger": "do", "contents": "do $0" },
+			"acceleration",
+			"script",
+			"incremental",
+			"increment",
+			"direction",
+			"absolute",
+			"aimed",
+			"relative",
+			"frames",
+			"seconds",
+			"die",
+			"set",
+			"bullet",
+			"at",
+			"in",
+			"action",
+         	{ "trigger": "wait", "contents": "wait $0 seconds" },
+			"difficulty",
+			"repeatCount",
+			"barrageTime",
+			"actionTime",
+         	{ "trigger": "Math", "contents": "Math.$0" },
+         	{ "trigger": "triangle", "contents": "triangle($0)" },
+         	{ "trigger": "square", "contents": "square($0)" },
+			"start"
+        ]
+}

@@ -17,10 +17,10 @@ class FireEvent implements ITriggerableEvent
 	{
 		this.def = cast def;
 	}
-	public inline function trigger(runningAction:RunningAction, runningBarrage:RunningBarrage):Void 
+	public inline function trigger(runningAction:RunningAction, runningBarrage:RunningBarrage, delta:Float):Void 
 	{
 		var bulletID = def.bulletID;
-		runningAction.currentBullet = runningBarrage.fire(runningAction, this, bulletID);
+		runningAction.currentBullet = runningBarrage.fire(runningAction, this, bulletID, delta);
 		if (bulletID != -1) {
 			var bd = runningBarrage.owner.bullets[bulletID];
 			if (bd.action != -1) {

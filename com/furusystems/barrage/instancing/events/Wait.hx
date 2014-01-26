@@ -17,7 +17,7 @@ class Wait implements ITriggerableEvent
 	{
 		this.def = cast def;
 	}
-	public inline function trigger(runningAction:RunningAction, runningBarrage:RunningBarrage):Void 
+	public inline function trigger(runningAction:RunningAction, runningBarrage:RunningBarrage, delta:Float):Void 
 	{
 		var sleepTimeNum:Float;
 		if (def.scripted) {
@@ -27,13 +27,10 @@ class Wait implements ITriggerableEvent
 		}
 		switch(def.durationType) {
 			case SECONDS:
-				runningAction.sleepTime = sleepTimeNum;
+				runningAction.sleepTime += sleepTimeNum;
 			case FRAMES:
-				runningAction.sleepTime = (sleepTimeNum * 1 / runningBarrage.owner.frameRate);
+				runningAction.sleepTime += (sleepTimeNum * 1 / runningBarrage.owner.frameRate);
 		}
-		#if debug
-		trace("Wait " + sleepTimeNum + " " + def.durationType + " = " + runningAction.sleepTime + " seconds");
-		#end
 	}
 	public inline function getType():EventType {
 		return def.type;

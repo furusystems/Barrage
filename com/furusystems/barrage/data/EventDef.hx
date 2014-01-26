@@ -9,6 +9,7 @@ enum EventType {
 	PROPERTY_TWEEN;
 	FIRE;
 	ACTION;
+	ACTION_REF;
 	DIE;
 	WAIT;
 }

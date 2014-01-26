@@ -36,8 +36,9 @@ class RunningBarrage
 		bullets = [];
 		activeActions = [];
 	}
+	
 	public function start():Void {
-		time = 0;
+		time = lastDelta = 0;
 		owner.executor.variables.set("barragetime", time);
 		runAction(null, new RunningAction(this, owner.start));
 		started = true;
@@ -48,38 +49,40 @@ class RunningBarrage
 		}
 		started = false;
 	}
-	public function update(delta:Float) {
+	public inline function update(delta:Float) {
 		if (!started) return;
 		time += delta;
 		lastDelta = delta;
 		
 		owner.executor.variables.set("barragetime", time);
-		for (a in activeActions) {
-			a.update(this, delta);
-		}
+		
 		if (activeActions.length == 0) {
 			stop();
 			onComplete.dispatch(this);
+		}else {
+			var i = activeActions.length;
+			while(i-- > 0) {
+				activeActions[i].update(this, delta);
+			}
 		}
 	}
-	public inline function runActionByID(triggerAction:RunningAction, id:Int, ?triggerBullet:IBullet):RunningAction {
-		return runAction(triggerAction, new RunningAction(this, owner.actions[id]), triggerBullet);
+	public inline function runActionByID(triggerAction:RunningAction, id:Int, ?triggerBullet:IBullet, ?overrides:Array<Property>, delta:Float = 0):RunningAction {
+		return runAction(triggerAction, new RunningAction(this, owner.actions[id]), triggerBullet, overrides, delta);
 	}
 	
-	public inline function runAction(triggerAction:RunningAction, action:RunningAction, ?triggerBullet:IBullet):RunningAction 
+	public inline function runAction(triggerAction:RunningAction, action:RunningAction, ?triggerBullet:IBullet, ?overrides:Array<Property>, delta:Float = 0):RunningAction 
 	{
-		//trace("Start action: "+action.def.name);
 		activeActions.push(action);
 		if(triggerAction!=null){
 			action.prevAccel = triggerAction.prevAccel;
 			action.prevSpeed = triggerAction.prevSpeed;
 			action.prevAngle = triggerAction.prevAngle;
 		}
-		action.enter(triggerAction, this);
+		action.enter(triggerAction, this, overrides);
 		if (triggerBullet != null) {
 			action.currentBullet = action.triggeringBullet = triggerBullet;
 		}
-		action.update(this, lastDelta);
+		action.update(this, delta);
 		return action;
 	}
 	public inline function stopAction(action:RunningAction) {
@@ -128,7 +131,7 @@ class RunningBarrage
 		else return action.triggeringBullet;
 	}
 	
-	public function fire(action:RunningAction, event:FireEvent, bulletID:Int):IBullet 
+	public function fire(action:RunningAction, event:FireEvent, bulletID:Int, delta:Float):IBullet 
 	{
 		var bd:BulletDef = bulletID == -1?owner.defaultBullet:owner.bullets[bulletID];
 		
@@ -157,13 +160,12 @@ class RunningBarrage
 			baseDirection = applyProperty(true, baseDirection, lastDirection, event.def.direction, this, action);
 		}
 		
-		
 		action.prevSpeed = baseSpeed;
 		action.prevAngle = baseDirection;
 		action.prevAccel = baseAccel;
 		
 		
-		lastBulletFired = emitter.emit(origin.pos, baseDirection, baseSpeed, baseAccel, lastDelta);
+		lastBulletFired = emitter.emit(origin.pos, baseDirection, baseSpeed, baseAccel, delta);
 		lastBulletFired.speed = baseSpeed;
 		lastBulletFired.angle = baseDirection;
 		return lastBulletFired;

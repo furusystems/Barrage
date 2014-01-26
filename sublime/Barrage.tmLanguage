@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>fileTypes</key>
+	<array>
+		<string>brg</string>
+	</array>
+	<key>name</key>
+	<string>Barrage script</string>
+	<key>patterns</key>
+	<array>
+		<dict>
+			<key>match</key>
+			<string>((#).*)</string>
+			<key>name</key>
+			<string>comment.brg</string>
+		</dict>
+		<dict>
+			<key>match</key>
+			<string>\b(repeat|increment|by|barrage|bullet|wait|do|in|at|fire|action|set|over|die|to)\b</string>
+			<key>name</key>
+			<string>keyword.brg</string>
+		</dict>
+		<dict>
+			<key>match</key>
+			<string>\b(called|times|absolute|speed|acceleration|direction|aimed|relative|incremental|is|frames|seconds)\b</string>
+			<key>name</key>
+			<string>string.brg</string>
+		</dict>
+		<dict>
+			<key>match</key>
+			<string>\b(difficulty|barrageTime|repeatCount|actionTime|Math|triangle|square)\b</string>
+			<key>name</key>
+			<string>support.brg</string>
+		</dict>
+		<dict>
+			<key>match</key>
+			<string>([0-9]+[.,]*[0-9]*)</string>
+			<key>name</key>
+			<string>constant.brg</string>
+		</dict>
+		<dict>
+			<key>match</key>
+			<string>\w</string>
+			<key>name</key>
+			<string>other.brg</string>
+		</dict>
+	</array>
+	<key>scopeName</key>
+	<string>source.brg</string>
+	<key>uuid</key>
+	<string>5bf6a900-2bf3-4709-85cf-146124c463bd</string>
+</dict>
+</plist>

@@ -18,18 +18,14 @@ class PropertySet implements ITriggerableEvent
 	{
 		this.def = cast def;
 	}
-	public inline function trigger(runningAction:RunningAction, runningBarrage:RunningBarrage):Void 
+	public inline function trigger(runningAction:RunningAction, runningBarrage:RunningBarrage, delta:Float):Void 
 	{
-		#if debug
-		trace("Property set");
-		#end
 		
-		var props:Dynamic = { };
 		if (def.speed != null) {
 			if (def.relative) {
-				props.speed = runningAction.currentBullet.speed + def.speed.get(runningBarrage, runningAction);
+				runningAction.currentBullet.speed += def.speed.get(runningBarrage, runningAction);
 			}else {
-				props.speed = def.speed.get(runningBarrage, runningAction);
+				runningAction.currentBullet.speed = def.speed.get(runningBarrage, runningAction);
 			}
 		}
 		if (def.direction != null) {
@@ -40,21 +36,20 @@ class PropertySet implements ITriggerableEvent
 				ang = def.direction.get(runningBarrage, runningAction);
 			}
 			if (def.relative) {
-				props.angle = runningAction.currentBullet.angle + ang;
+				runningAction.currentBullet.angle += ang;
 			}else {
-				props.angle = ang;
+				runningAction.currentBullet.angle = ang;
 			}
 			
 		}
 		if (def.acceleration != null) {
 			var accel = def.acceleration.get(runningBarrage, runningAction);
 			if (def.relative) {
-				props.acceleration = runningAction.currentBullet.acceleration + accel;
+				runningAction.currentBullet.acceleration += accel;
 			}else {
-				props.acceleration = accel;
+				runningAction.currentBullet.acceleration = accel;
 			}
 		}
-		Actuate.tween(runningAction.currentBullet, 0, props);
 	}
 	public inline function getType():EventType {
 		return def.type;

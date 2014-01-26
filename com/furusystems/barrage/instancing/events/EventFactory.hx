@@ -22,6 +22,8 @@ class EventFactory
 				out = new PropertyTween(def);
 			case EventType.ACTION:
 				out = new ActionEvent(def);
+			case EventType.ACTION_REF:
+				out = new ActionReferenceEvent(def);
 		}
 		return out;
 	}

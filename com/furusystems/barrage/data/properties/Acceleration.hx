@@ -8,10 +8,7 @@ class Acceleration extends Property
 {
 	public function new() 
 	{
-		super();
-	}
-	public function toString():String {
-		return "Acceleration";
+		super("Acceleration");
 	}
 	
 }

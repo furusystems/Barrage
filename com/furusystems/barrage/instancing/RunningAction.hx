@@ -14,7 +14,7 @@ import haxe.ds.Vector;
 class RunningAction
 {
 	public var def:ActionDef;
-	public var events:Vector<ITriggerableEvent>;
+	public var events:Array<ITriggerableEvent>;
 	public var sleepTime:Float;
 	public var currentBullet:IBullet;
 	public var triggeringBullet:IBullet;
@@ -25,19 +25,27 @@ class RunningAction
 	
 	public var actionTime:Float;
 	
+	public var prevDelta:Float;
+	
 	var barrage:RunningBarrage;
 	var repeatCount:Int;
 	var repeatNo:Int;
 	var eventsPerCycle:Int;
+	var runEvents:Int;
 	public var callingAction:RunningAction;
 	
-	public var props:Map<String,Property>;
+	public var properties:Array<Property>;
 	
 	public function new(runningBarrage:RunningBarrage, def:ActionDef) 
 	{
 		this.def = def;
 		
-		prevAngle = prevSpeed = prevAccel = sleepTime = 0;
+		prevAngle = prevSpeed = prevAccel = sleepTime = prevDelta = 0;
+		
+		properties = [];
+		for (p in def.properties) {
+			properties.push(p.clone());
+		}
 		
 		//#if debug
 		//var repeatCount = def.events.length;
@@ -46,80 +54,82 @@ class RunningAction
 		eventsPerCycle = def.events.length;
 		var numEvents = repeatCount * def.events.length;
 		//#end
-		events = new Vector<ITriggerableEvent>(numEvents);
+		events = new Array<ITriggerableEvent>();
 		var idx:Int = 0;
 		for (i in 0...numEvents) {
 			events[i] = EventFactory.create(def.events[idx]);
 			idx++;
 			if (idx == def.events.length) idx = 0;
 		}
+		events.reverse();
+		runEvents = 0;
 	}
 	
-	public inline function reset():Void {
-		for (i in 0...events.length) {
-			events[i].hasRun = false;
-		}
-		currentBullet = null;
-	}
-	public inline function update(runningBarrage:RunningBarrage, delta:Float) {
-		//trace("Update: " + delta);
-		sleepTime -= delta;
-		actionTime += delta;
-		if (sleepTime <= 0) {
-			runningBarrage.owner.executor.variables.set("actiontime", actionTime);
-			var runEvents:Int = 0;
-			repeatNo = 0;
-			for (i in 0...events.length) {
-				var e = events[i];
-				if (e.hasRun) {
-					runEvents++;
-					continue;
+	public function update(runningBarrage:RunningBarrage, delta:Float) {
+		if (events.length == 0) {
+			runningBarrage.stopAction(this);
+		}else{
+			actionTime += delta;
+			sleepTime -= delta;
+			if (sleepTime <= 0) {
+				//delta += Math.abs(sleepTime);
+				runningBarrage.owner.executor.variables.set("actiontime", actionTime);
+				var i:Int = events.length;
+				while (i-- > 0) {
+					var e = events.pop();
+					repeatNo = Math.floor(runEvents / eventsPerCycle);
+					runEvent(runningBarrage, e, delta);
+					if (e.getType() == EventType.WAIT) {
+						break;
+					}
 				}
-				repeatNo = Math.floor(runEvents / eventsPerCycle);
-				runEvent(runningBarrage, e);
-				runEvents++;
-				if (e.getType() == EventType.WAIT) {
-					break;
-				}
-			}
-			if (runEvents == events.length) {
-				runningBarrage.stopAction(this);
+				
 			}
 		}
 	}
 	
-	inline function runEvent(runningBarrage:RunningBarrage, e:ITriggerableEvent) 
+	inline function runEvent(runningBarrage:RunningBarrage, e:ITriggerableEvent, delta:Float)
 	{
 		e.hasRun = true;
 		runningBarrage.owner.executor.variables.set("repeatcount", repeatNo);
-		e.trigger(this, runningBarrage);
+		e.trigger(this, runningBarrage, delta);
 	}
 	
-	public inline function getProperty(name:String):Property {
-		var prop = props.get(name);
-		if (prop == null) {
-			prop = new Property();
-			props.set(name, prop);
+	public function getProperty(name:String):Property {
+		for (p in properties) {
+			if (p.name == name) return p;
 		}
-		return prop;
-	}
-	
-	
-	public inline function enter(callingAction:RunningAction, barrage:RunningBarrage) 
-	{
-		reset();
-		actionTime = 0;
-		this.callingAction = callingAction;
 		if (callingAction != null) {
-			props = callingAction.props;
-		}else {
-			props = new Map<String,Property>();
+			return callingAction.getProperty(name);
 		}
+		return null;
+	}
+	
+	function pollProp(name:String):Float {
+		return getProperty(name).get(barrage, this);
+	}
+	
+	public inline function enter(callingAction:RunningAction, barrage:RunningBarrage, ?overrides:Array<Property>) 
+	{
+		actionTime = 0;
+		if (overrides != null) {
+			for (o in overrides) {
+				for (p in properties) {
+					if (p.name == o.name) {
+						p.copyFrom(o);
+						//trace("Override: " + p.get(barrage,this));
+					}
+				}
+			}
+		}
+		for (p in properties) {
+			barrage.owner.executor.variables.set(p.name, p.get(barrage, callingAction));
+		}
+		this.callingAction = callingAction;
 		this.barrage = barrage;
 	}
 	public inline function exit(barrage:RunningBarrage) {
 		currentBullet = null;
-		props = null;
 	}
 	
 }

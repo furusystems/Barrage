@@ -4,6 +4,7 @@ import com.furusystems.barrage.data.ActionDef;
 import com.furusystems.barrage.data.BarrageItemDef;
 import com.furusystems.barrage.data.BulletDef;
 import com.furusystems.barrage.data.events.ActionEventDef;
+import com.furusystems.barrage.data.events.ActionReferenceEventDef;
 import com.furusystems.barrage.data.events.DieEventDef;
 import com.furusystems.barrage.data.events.FireEventDef;
 import com.furusystems.barrage.data.events.PropertySetDef;
@@ -80,7 +81,6 @@ class Parser
 			}
 		}
 		
-		
 		for (k in actionDefMap.keys()) {
 			var ad = actionDefMap.get(k);
 			output.actions[actionIdMap.get(ad.name)] = ad;
@@ -149,6 +149,8 @@ class Parser
 		
 		for (c in b.children) {
 			switch(c.tokens) {
+				case [TDo, TIdentifier]:
+					buildActionRef(c);
 				case [TDo, TAction]:
 					buildActionDef(c, true);
 				case [TFire, TBullet]:
@@ -182,6 +184,8 @@ class Parser
 		
 		for (c in b.children) {
 			switch(c.tokens) {
+				case [TDo, TIdentifier]:
+					buildActionRef(c);
 				case [TDo, TAction]:
 					buildActionDef(c, true);
 				case [TFire, TBullet]:
@@ -192,6 +196,33 @@ class Parser
 		}
 		popStack();
 		return bd;
+	}
+	
+	static private function buildActionRef(b:Block) 
+	{
+		var ad:ActionDef = cast currentElement();
+		var evt:ActionReferenceEventDef = new ActionReferenceEventDef();
+		evt.actionID = actionIdMap.get(b.values[1]);
+		for (c in b.children) {
+			switch(c.tokens) {
+				case [TIdentifier, TNumber | TConst_math | TScript]:
+					evt.overrides.push(createProperty(c));
+				default:
+			}
+		}
+		ad.events.push(evt);
+	}
+	static inline function createProperty(b:Block):Property {
+		var out:Property = new Property(b.values[0]);		
+		switch(b.tokens[1]) {
+			case TNumber | TConst_math:
+				out.constValue = b.values[1];
+			case TScript:
+				out.script = b.values[1];
+				out.scripted = true;
+			default:
+		}
+		return out;
 	}
 	
 	static inline function clean(data:String):String {
@@ -411,9 +442,8 @@ class Parser
 	
 	static function readStatement(b:Block):Void {
 		switch(b.tokens) {
-			case [TSpeed | TDirection | TAcceleration, TNumber | TConst_math | TScript]:
+			case [TIdentifier|TSpeed | TDirection | TAcceleration, TNumber | TConst_math | TScript]:
 				runPropertyInit(b);
-				
 			case [TSet|TIncrement, TSpeed | TDirection | TAcceleration, TNumber | TConst_math | TScript | TAimed]:
 				runPropertySet(b, false, b.tokens[0] == TIncrement);
 			case [TSet|TIncrement, TSpeed | TDirection | TAcceleration, TNumber|TConst_math|TScript|TAimed, TOver, TNumber|TConst_math|TScript, TSeconds | TFrames]:
@@ -421,7 +451,7 @@ class Parser
 			case [TWait, TNumber|TConst_math|TScript, TFrames | TSeconds]:
 				runWait(b);
 			case [TDo, TIdentifier]:
-				runAction(b, false);
+				//runAction(b, false);
 			case [TFire, TIdentifier]:
 				runFire(b);
 			case [TFire, TIdentifier | TBullet, TAt, TIncremental | TAbsolute | TRelative, TSpeed, TNumber | TConst_math | TScript]:
@@ -525,15 +555,6 @@ class Parser
 		ad.events.push(event);
 	}
 	
-	static inline function runAction(b:Block, anon:Bool) 
-	{
-		if (anon) {
-			trace("Run anonymous action");
-		}else {
-			trace("Run action " + b.values[1]);
-		}
-	}
-	
 	static inline function runWait(b:Block) 
 	{
 		var event = new WaitDef();
@@ -616,14 +637,19 @@ class Parser
 		var value:Null<Dynamic>;
 		var p:Property = null;
 		var object:Dynamic = currentElement();
-		switch(b.tokens[0]) {
-			case TSpeed:
-				p = object.speed;
-			case TDirection:
-				p = object.direction;
-			case TAcceleration:
-				p = object.acceleration;
-			default:
+		if(b.tokens[0] != TIdentifier){
+			switch(b.tokens[0]) {
+				case TSpeed:
+					p = object.speed;
+				case TDirection:
+					p = object.direction;
+				case TAcceleration:
+					p = object.acceleration;
+				default:
+			}
+		}else {
+			p = new Property(b.values[0]);
+			object.properties.push(p);
 		}
 		switch(b.tokens[1]) {
 			case TNumber|TConst_math:

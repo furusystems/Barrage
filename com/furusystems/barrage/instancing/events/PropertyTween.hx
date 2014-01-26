@@ -19,7 +19,7 @@ class PropertyTween implements ITriggerableEvent
 	{
 		this.def = cast def;
 	}
-	public inline function trigger(runningAction:RunningAction, runningBarrage:RunningBarrage):Void 
+	public inline function trigger(runningAction:RunningAction, runningBarrage:RunningBarrage, delta:Float):Void 
 	{
 		#if debug
 		trace("Property tween");

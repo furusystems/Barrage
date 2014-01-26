@@ -22,9 +22,26 @@ class Property
 	public var constValue:Float = 0;
 	public var script:Null<hscript.Expr>;
 	public var scripted:Bool = false;
-	public function new() 
+	public var name:String;
+	public function new(name:String = "Property") 
 	{
+		this.name = name;
 		modifier = ABSOLUTE;
+	}
+	
+	public inline function copyFrom(other:Property):Void {
+		this.isAimed = other.isAimed;
+		this.isRandom = other.isRandom;
+		this.constValue = other.constValue;
+		this.script = other.script;
+		this.scripted = other.scripted;
+		this.name = other.name;
+		this.modifier = other.modifier;
+	}
+	public inline function clone():Property {
+		var n = new Property(name);
+		n.copyFrom(this);
+		return n;
 	}
 	
 	public inline function get(runningBarrage:RunningBarrage, action:RunningAction):Float 
@@ -39,6 +56,10 @@ class Property
 	{
 		scripted = false;
 		return constValue = f;
+	}
+	
+	public function toString():String {
+		return '[$name]';
 	}
 	
 }

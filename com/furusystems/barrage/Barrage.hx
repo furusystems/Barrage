@@ -36,6 +36,7 @@ class Barrage
 		actions = [];
 		bullets = [];
 	}
+	
 	function tri(x:Float, a:Float = 0.5):Float
 	{
 		x = x / (2.0*Math.PI);

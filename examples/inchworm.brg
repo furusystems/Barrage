@@ -1,0 +1,25 @@
+barrage called inchworm
+	bullet called wormsegment
+		speed is 100
+		do action
+			increment direction by 10 over 1 seconds
+			set speed to 0
+			wait 0.5 seconds
+			set speed to 100
+			wait 0.5 seconds
+			repeat 7 times
+
+	action called worm
+		myvalue is 0
+		fire wormsegment in absolute direction (myvalue)
+		do action
+			fire wormsegment in incremental direction (360/30) 
+			repeat 29 times
+		wait 0.1 seconds
+		repeat 4 times
+
+	action called start
+		do worm
+			myvalue is (repeatCount*6)
+		wait 1 seconds
+		repeat 4 times
