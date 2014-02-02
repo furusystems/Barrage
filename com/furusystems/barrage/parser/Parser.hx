@@ -605,7 +605,7 @@ class Parser
 				p.script = b.values[2];
 				p.scripted = true;
 			case TAimed:
-				p.isAimed = true;
+				p.modifier = AIMED;
 			default:
 		}
 		if (overTime) {

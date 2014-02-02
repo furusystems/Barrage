@@ -2,10 +2,12 @@ package com.furusystems.barrage.instancing;
 import com.furusystems.barrage.Barrage;
 import com.furusystems.barrage.data.BulletDef;
 import com.furusystems.barrage.data.properties.Property;
+import com.furusystems.barrage.instancing.animation.Animator;
 import com.furusystems.barrage.instancing.events.FireEvent;
 import com.furusystems.barrage.instancing.IOrigin;
 import com.furusystems.flywheel.events.Signal1.Signal1;
 import com.furusystems.flywheel.geom.Vector2D;
+import haxe.ds.GenericStack;
 
 /**
  * ...
@@ -23,7 +25,9 @@ class RunningBarrage
 	
 	public var lastBulletFired:IBullet;
 	
-	var bullets:Array<IBullet>;
+	public var animators:GenericStack<Animator>; //TODO: Replace with vector pool?
+	public var bullets:GenericStack<IBullet>; 
+	
 	var started:Bool;
 	var lastDelta:Float = 0;
 	public var emitter:IBulletEmitter;
@@ -33,8 +37,9 @@ class RunningBarrage
 		onComplete = new Signal1<RunningBarrage>();
 		this.emitter = emitter;
 		this.owner = owner;
-		bullets = [];
 		activeActions = [];
+		bullets = new GenericStack<IBullet>();
+		animators = new GenericStack<Animator>();
 	}
 	
 	public function start():Void {
@@ -54,9 +59,12 @@ class RunningBarrage
 		time += delta;
 		lastDelta = delta;
 		
+		cleanBullets();
+		updateAnimators(delta);
+		
 		owner.executor.variables.set("barragetime", time);
 		
-		if (activeActions.length == 0) {
+		if (activeActions.length == 0 && bullets.isEmpty()) {
 			stop();
 			onComplete.dispatch(this);
 		}else {
@@ -66,6 +74,31 @@ class RunningBarrage
 			}
 		}
 	}
+	
+	inline function cleanBullets():Void {
+		for (b in bullets) {
+			if (!b.active) bullets.remove(b);
+		}
+	}
+	
+	inline function updateAnimators(delta:Float) 
+	{
+		for (a in animators) {
+			if (a.update(delta) == false) {
+				animators.remove(a);
+			}
+		}
+	}
+	
+	public function getAnimator(target:IBullet):Animator {
+		for (a in animators) {
+			if (a.target == target) return a;
+		}
+		var a = new Animator(target);
+		animators.add(a);
+		return a;
+	}
+	
 	public inline function runActionByID(triggerAction:RunningAction, id:Int, ?triggerBullet:IBullet, ?overrides:Array<Property>, delta:Float = 0):RunningAction {
 		return runAction(triggerAction, new RunningAction(this, owner.actions[id]), triggerBullet, overrides, delta);
 	}
@@ -157,7 +190,10 @@ class RunningBarrage
 			baseAccel = applyProperty(false, baseAccel, lastAcceleration, event.def.acceleration, this, action);
 		}
 		if (event.def.direction != null) {
-			baseDirection = applyProperty(true, baseDirection, lastDirection, event.def.direction, this, action);
+			baseDirection = applyProperty(true, baseDirection, lastDirection, event.def.direction, this, action);			
+			if (event.def.direction.modifier == RELATIVE) {
+				baseDirection = action.triggeringBullet.angle + baseDirection;
+			}
 		}
 		
 		action.prevSpeed = baseSpeed;
@@ -168,6 +204,7 @@ class RunningBarrage
 		lastBulletFired = emitter.emit(origin.pos, baseDirection, baseSpeed, baseAccel, delta);
 		lastBulletFired.speed = baseSpeed;
 		lastBulletFired.angle = baseDirection;
+		bullets.add(lastBulletFired);
 		return lastBulletFired;
 	}
 	

@@ -1,23 +1,26 @@
-barrage called inchworm
-	bullet called offspring
-		speed is -100
-		acceleration is 150
-		do action
-			wait 1 seconds
-			set direction to aimed over 1 seconds
+barrage called blah
+	bullet called drop
+		speed is 0
+		acceleration is 100
 
-	bullet called source
+	bullet called mybullet
 		speed is 100
 		do action
 			do action
-				wait 0.25 seconds
-				fire offspring in aimed direction (360/10*0.5)
-				do action
-					fire offspring in incremental direction (360/10)
-					repeat 10 times
-				repeat 6 times
-			wait (6*0.25) seconds
-			die
+				increment direction by 180 over 1 seconds
+				fire drop in relative direction 0
+				wait 1 seconds
+				increment direction by 180 over 1.3 seconds
+				wait 1 seconds
+				increment direction by -180 over 1 seconds
+				wait 1 seconds
+				increment direction by -180 over 1.3 seconds
+				wait 1 seconds
+				repeat 2 times
 
 	action called start
-		fire source in aimed direction 0
+		fire mybullet in absolute direction 0
+		fire mybullet in absolute direction (360/3)
+		fire mybullet in absolute direction (360/3*2)
+		wait 0.1 seconds
+		repeat 30 times

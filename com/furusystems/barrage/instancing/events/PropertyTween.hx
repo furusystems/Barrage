@@ -4,8 +4,6 @@ import com.furusystems.barrage.data.events.PropertyTweenDef;
 import com.furusystems.barrage.instancing.events.ITriggerableEvent;
 import com.furusystems.barrage.instancing.RunningAction;
 import com.furusystems.barrage.instancing.RunningBarrage;
-import motion.Actuate;
-import motion.easing.Linear;
 
 /**
  * ...
@@ -34,40 +32,43 @@ class PropertyTween implements ITriggerableEvent
 		if (def.durationType == FRAMES) {
 			tweenTimeNum = (tweenTimeNum * 1 / runningBarrage.owner.frameRate);
 		}
-		var props:Dynamic = { };
+		var bullet = runningAction.triggeringBullet;
+		var animator = runningBarrage.getAnimator(bullet);
 		if (def.speed != null) {
+			var speedAnimator = animator.getSpeed();
+			var speedValue = 0.0;
 			if (def.relative) {
-				props.speed = runningAction.currentBullet.speed + def.speed.get(runningBarrage, runningAction);
+				speedValue = bullet.speed + def.speed.get(runningBarrage, runningAction);
 			}else {
-				props.speed = def.speed.get(runningBarrage, runningAction);
+				speedValue = def.speed.get(runningBarrage, runningAction);
 			}
+			speedAnimator.retarget(bullet.speed, speedValue, tweenTimeNum, delta);
 		}
 		if (def.direction != null) {
+			var angleAnimator = animator.getAngle();
 			var ang:Float = 0;
-			if (def.direction.isAimed) {
-				var currentAngle:Float = runningAction.currentBullet.angle;
-				ang = runningBarrage.emitter.getAngleToPlayer(runningAction.currentBullet.pos);
+			if (def.direction.modifier==AIMED) {
+				var currentAngle:Float = bullet.angle;
+				ang = runningBarrage.emitter.getAngleToPlayer(bullet.pos);
 				while (ang - currentAngle > 180) ang -= 360;
 				while (ang - currentAngle < -180) ang += 360;
 			}else {
 				ang = def.direction.get(runningBarrage, runningAction);
 			}
 			if (def.relative) {
-				props.angle = runningAction.currentBullet.angle + ang;
-			}else {
-				props.angle = ang;
+				ang = bullet.angle + ang;
 			}
+			angleAnimator.retarget(bullet.angle, ang, tweenTimeNum, delta);
 			
 		}
 		if (def.acceleration != null) {
+			var accelAnimator = animator.getAcceleration();
 			var accel = def.acceleration.get(runningBarrage, runningAction);
 			if (def.relative) {
-				props.acceleration = runningAction.currentBullet.acceleration + accel;
-			}else {
-				props.acceleration = accel;
+				accel = bullet.acceleration + accel;
 			}
+			accelAnimator.retarget(bullet.acceleration, accel, tweenTimeNum, delta);
 		}
-		Actuate.tween(runningAction.currentBullet, tweenTimeNum, props,false).ease(Linear.easeNone);
 	}
 	public inline function getType():EventType {
 		return def.type;
