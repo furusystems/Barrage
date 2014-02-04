@@ -14,8 +14,10 @@ import com.furusystems.barrage.data.properties.DurationType;
 import com.furusystems.barrage.data.properties.Property;
 import com.furusystems.barrage.parser.Parser.Block;
 import com.furusystems.barrage.parser.Token;
+import haxe.ds.Vector.Vector;
 import hscript.Expr;
 import hscript.Interp;
+using Lambda;
 
 /**
  * ...
@@ -28,6 +30,7 @@ class Parser
 	static var number:EReg = ~/[0-9]+[.,-]*[0-9]*/;
 	static var math:EReg = ~/\([.\d *\-\+\/]*\)/;
 	static var script:EReg = ~/\(.*\)/;
+	static var vector:EReg = ~/\[(-*\d+(\.(\d+))*,*){2}\]/;
 	
 	static var stack:Array<BarrageItemDef>;
 	
@@ -312,11 +315,21 @@ class Parser
 				return new hscript.Interp().execute(expr);
 			case TNumber:
 				return Std.parseFloat(data);
+			case TVector:
+				var vec = new Vector<Float>(2);
+				var substr = data.substr(1, data.length - 1);
+				var list = substr.split(",");
+				vec[0] = Std.parseFloat(list[0]);
+				vec[1] = Std.parseFloat(list[1]);
+				return vec;
 			default:
 				return data;
 		}
 	}
 	static function getTokenType(data:String):Token {
+		if (vector.match(data)) {
+			return TVector;
+		}
 		if (script.match(data)) {
 			return TScript;
 		}
@@ -339,6 +352,10 @@ class Parser
 				return TSpeed;
 			case "fire":
 				return TFire;
+			case "from":
+				return TFrom;
+			case "position":
+				return TPosition;
 			case "do":
 				return TDo;
 			case "acceleration":
@@ -373,6 +390,8 @@ class Parser
 				return TAt;
 			case "in":
 				return TIn;
+			case "with":
+				return TWith;
 			case "action":
 				return TAction;
 			case "wait":
@@ -438,6 +457,10 @@ class Parser
 	
 	
 	static function readStatement(b:Block):Void {
+		if (b.tokens[0] == TFire) {
+			runFireParse(b);
+			return;
+		}
 		switch(b.tokens) {
 			case [TIdentifier|TSpeed | TDirection | TAcceleration, TNumber | TConst_math | TScript]:
 				runPropertyInit(b);
@@ -447,18 +470,6 @@ class Parser
 				runPropertySet(b, true, b.tokens[0] == TIncrement);
 			case [TWait, TNumber|TConst_math|TScript, TFrames | TSeconds]:
 				runWait(b);
-			case [TDo, TIdentifier]:
-				//runAction(b, false);
-			case [TFire, TIdentifier]:
-				runFire(b);
-			case [TFire, TIdentifier | TBullet, TAt, TIncremental | TAbsolute | TRelative, TSpeed, TNumber | TConst_math | TScript]:
-				runFire(b, b.tokens[3], b.values[5]);
-			case [TFire, TIdentifier | TBullet, TIn, TIncremental | TAbsolute | TRelative | TAimed, TDirection, TNumber | TConst_math | TScript]:
-				runFire(b,null,null,b.tokens[3], b.values[5]);
-			case [TFire, TIdentifier | TBullet, TAt, TIncremental | TAbsolute | TRelative, TSpeed, TNumber | TConst_math | TScript, TIn, TIncremental | TAbsolute | TRelative | TAimed, TDirection, TNumber | TConst_math | TScript]:
-				runFire(b, b.tokens[3], b.values[5], b.tokens[7], b.values[9]);
-			case [TFire, TIdentifier | TBullet, TIn, TIncremental | TAbsolute | TRelative | TAimed, TDirection, TNumber | TConst_math | TScript, TAt, TIncremental | TAbsolute | TRelative, TSpeed, TNumber | TConst_math | TScript]:
-				runFire(b, b.tokens[7], b.values[9], b.tokens[3], b.values[5]);
 			case [TRepeat, TNumber | TConst_math | TScript]:
 				runRepeat(b);
 			case [TVanish]:
@@ -467,6 +478,140 @@ class Parser
 				throw new ParseError(b.lineNo, "Unrecognized line " + b.lineNo + ' "' + b.tokens + '" raw: '+b.raw);
 		}
 		
+	}
+	
+	static private function runFireParse(b:Block) 
+	{
+		var speedType:Token = null;
+		var accelerationType:Token = null;
+		var directionType:Token = null;
+		var positionType:Token = null;
+		
+		var speed:Dynamic = null;
+		var acceleration:Dynamic = null;
+		var direction:Dynamic = null;
+		var position:Dynamic = null;
+		
+		var index = 2;
+		
+		while (index < b.tokens.length) {
+			switch(b.tokens.slice(index, index + 4)) {
+				case [TAt, TIncremental | TAbsolute | TRelative, TSpeed, TNumber | TConst_math | TScript]:
+					speedType = b.tokens[index + 1];
+					speed = b.values[index + 3];
+				case [TIn, TIncremental | TAbsolute | TRelative | TAimed, TDirection, TNumber | TConst_math | TScript]:
+					directionType = b.tokens[index + 1];
+					direction = b.values[index + 3];
+				case [TFrom, TIncremental | TAbsolute | TRelative, TPosition, TScript | TVector]:
+					positionType = b.tokens[index + 1];
+					position = b.values[index + 3];
+				case [TWith, TIncremental | TAbsolute | TRelative, TAcceleration, TNumber | TConst_math | TScript]:
+					accelerationType = b.tokens[index + 1];
+					acceleration = b.values[index + 3];
+				default:
+					throw new ParseError(b.lineNo, "Unrecognized line " + b.lineNo + ' "' + b.tokens + '" raw: '+b.raw);
+			}
+			index += 4;
+		}
+		
+		
+		runFire(b, speedType, speed, directionType, direction, positionType, position, accelerationType, acceleration);
+	}
+	
+	static inline function runFire(b:Block, ?speedType:Token, ?speed:Dynamic, ?directionType:Token, ?direction:Dynamic, ?positionType:Token, ?position:Dynamic, ?accelerationType:Token, ?acceleration:Dynamic) 
+	{
+		//trace("Run fire: " + direction);
+		var anon:Bool = b.tokens[1] == TBullet;
+		
+		var event = new FireEventDef();
+		
+		if (!anon) {
+			event.bulletID = bulletIdMap.get(b.values[1]);
+		}
+		
+		
+		
+		if (speedType != null) {
+			event.speed = new Property("Speed");
+			switch(speedType) {
+				case TRelative:
+					event.speed.modifier = RELATIVE;
+				case TIncremental:
+					event.speed.modifier = INCREMENTAL;
+				default:
+					event.speed.modifier = ABSOLUTE;
+			}
+			if (Std.is(speed, Expr)) {
+				event.speed.script = speed;
+				event.speed.scripted = true;
+			}else {
+				event.speed.constValue = speed;
+			}
+			
+		}
+		
+		if (accelerationType != null) {
+			event.acceleration = new Property("Acceleration");
+			switch(accelerationType) {
+				case TRelative:
+					event.acceleration.modifier = RELATIVE;
+				case TIncremental:
+					event.acceleration.modifier = INCREMENTAL;
+				default:
+					event.acceleration.modifier = ABSOLUTE;
+			}
+			if (Std.is(acceleration, Expr)) {
+				event.acceleration.script = acceleration;
+				event.acceleration.scripted = true;
+			}else {
+				event.acceleration.constValue = acceleration;
+			}
+			
+		}
+		
+		if (positionType != null) {
+			event.position = new Property("Position");
+			switch(positionType) {
+				case TIncremental:
+					event.position.modifier = INCREMENTAL;
+				case TRelative:
+					event.position.modifier = RELATIVE;
+				default:
+					event.position.modifier = ABSOLUTE;
+			}
+			if (Std.is(position, Expr)) {
+				event.position.script = position;
+				event.position.scripted = true;
+			}else {
+				event.position.constValueVec = position;
+			}
+			
+		}
+		
+		event.direction = new Property("Direction");
+		if (directionType != null) {
+			switch(directionType) {
+				case TAbsolute:
+					event.direction.modifier = ABSOLUTE;
+				case TRelative:
+					event.direction.modifier = RELATIVE;
+				case TIncremental:
+					event.direction.modifier = INCREMENTAL;
+				default:
+					event.direction.modifier = AIMED;
+			}
+			if (Std.is(direction, Expr)) {
+				event.direction.script = direction;
+				event.direction.scripted = true;
+			}else {
+				event.direction.constValue = direction;
+			}
+		}else {
+			event.direction.modifier = AIMED;
+		}
+		
+		var ad:ActionDef = cast currentElement();
+		ad.events.push(event);
 	}
 	
 	//Statement handlers
@@ -490,61 +635,7 @@ class Parser
 		}
 	}
 	
-	static inline function runFire(b:Block, ?speedType:Token, ?speed:Dynamic, ?directionType:Token, ?direction:Dynamic) 
-	{
-		//trace("Run fire: " + direction);
-		var anon:Bool = b.tokens[1] == TBullet;
-		
-		var event = new FireEventDef();
-		
-		if (!anon) {
-			event.bulletID = bulletIdMap.get(b.values[1]);
-		}
-		
-		
-		
-		if (speed != null) {
-			event.speed = new Property("Speed");
-			switch(speedType) {
-				case TRelative:
-					event.speed.modifier = RELATIVE;
-				case TIncremental:
-					event.speed.modifier = INCREMENTAL;
-				default:
-					event.speed.modifier = ABSOLUTE;
-			}
-			if (Std.is(speed, Expr)) {
-				event.speed.script = speed;
-				event.speed.scripted = true;
-			}else {
-				event.speed.constValue = speed;
-			}
-			
-		}
-		event.direction = new Property("Direction");
-		if (direction != null) {
-			switch(directionType) {
-				case TAbsolute:
-					event.direction.modifier = ABSOLUTE;
-				case TRelative:
-					event.direction.modifier = RELATIVE;
-				case TIncremental:
-					event.direction.modifier = INCREMENTAL;
-				default:
-					event.direction.modifier = AIMED;
-			}
-			if (Std.is(direction, Expr)) {
-				event.direction.script = direction;
-				event.direction.scripted = true;
-			}else {
-				event.direction.constValue = direction;
-			}
-		}else {
-			event.direction.modifier = AIMED;
-		}
-		var ad:ActionDef = cast currentElement();
-		ad.events.push(event);
-	}
+	
 	
 	static inline function runWait(b:Block) 
 	{
@@ -636,6 +727,8 @@ class Parser
 					p = object.direction;
 				case TAcceleration:
 					p = object.acceleration;
+				case TPosition:
+					p = object.position;
 				default:
 			}
 		}else {

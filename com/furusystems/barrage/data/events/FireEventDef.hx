@@ -12,6 +12,7 @@ class FireEventDef extends EventDef
 	public var speed:Property;
 	public var acceleration:Property;
 	public var direction:Property;
+	public var position:Property;
 	public function new() 
 	{
 		super();

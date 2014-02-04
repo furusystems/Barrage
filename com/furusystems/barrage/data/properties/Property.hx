@@ -2,6 +2,7 @@ package com.furusystems.barrage.data.properties;
 import com.furusystems.barrage.data.properties.Property.PropertyModifier;
 import com.furusystems.barrage.instancing.RunningAction;
 import com.furusystems.barrage.instancing.RunningBarrage;
+import haxe.ds.Vector;
 
 /**
  * ...
@@ -19,6 +20,7 @@ class Property
 	public var modifier:PropertyModifier;
 	public var isRandom:Bool;
 	public var constValue:Float = 0;
+	public var constValueVec:Vector<Float>;
 	public var script:Null<hscript.Expr>;
 	public var scripted:Bool = false;
 	public var name:String;
@@ -26,11 +28,14 @@ class Property
 	{
 		this.name = name;
 		modifier = ABSOLUTE;
+		constValueVec = new Vector<Float>(2);
+		constValueVec[0] = constValueVec[1] = 0;
 	}
 	
 	public inline function copyFrom(other:Property):Void {
 		this.isRandom = other.isRandom;
 		this.constValue = other.constValue;
+		other.constValueVec.blit(0, constValueVec, 0, constValueVec.length);
 		this.script = other.script;
 		this.scripted = other.scripted;
 		this.name = other.name;
@@ -44,16 +49,31 @@ class Property
 	
 	public inline function get(runningBarrage:RunningBarrage, action:RunningAction):Float 
 	{
-		var value:Float = 0;
-		if (scripted) value = runningBarrage.owner.executor.execute(script);
-		else value = constValue;
-		return value;
+		if (scripted) {
+			return runningBarrage.owner.executor.execute(script);
+		}else {
+			//trace("Value: " + constValue);
+			return constValue;
+		}
+	}
+	public inline function getVector(runningBarrage:RunningBarrage, action:RunningAction):Vector<Float> {
+		if (scripted) {
+			return runningBarrage.owner.executor.execute(script);
+		}else {
+			return constValueVec;
+		}
 	}
 	
 	public inline function set(f:Float):Float
 	{
 		scripted = false;
 		return constValue = f;
+	}
+	public inline function setVec(x:Float, y:Float):Vector<Float> {
+		scripted = false;
+		constValueVec.set(0, x);
+		constValueVec.set(1, y);
+		return constValueVec;
 	}
 	
 	public function toString():String {

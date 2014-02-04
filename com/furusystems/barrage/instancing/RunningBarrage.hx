@@ -8,6 +8,7 @@ import com.furusystems.barrage.instancing.IOrigin;
 import com.furusystems.flywheel.events.Signal1.Signal1;
 import com.furusystems.flywheel.geom.Vector2D;
 import haxe.ds.GenericStack;
+import haxe.ds.Vector.Vector;
 
 /**
  * ...
@@ -110,6 +111,8 @@ class RunningBarrage
 			action.prevAccel = triggerAction.prevAccel;
 			action.prevSpeed = triggerAction.prevSpeed;
 			action.prevAngle = triggerAction.prevAngle;
+			action.prevPositionX = triggerAction.prevPositionX;
+			action.prevPositionY = triggerAction.prevPositionY;
 		}
 		action.enter(triggerAction, this, overrides);
 		if (triggerBullet != null) {
@@ -134,7 +137,7 @@ class RunningBarrage
 	
 	static var tempVec:Vector2D = new Vector2D();
 	
-	function applyProperty(isAngle:Bool, base:Float, prev:Float, prop:Property, runningBarrage:RunningBarrage, runningAction:RunningAction):Float {
+	function applyProperty(origin:Vector2D, base:Float, prev:Float, prop:Property, runningBarrage:RunningBarrage, runningAction:RunningAction):Float {
 		var other = prop.get(runningBarrage, runningAction);
 		switch(prop.modifier) {
 			case ABSOLUTE:
@@ -144,7 +147,7 @@ class RunningBarrage
 			case RELATIVE:
 				return base + other;
 			case AIMED:
-				return emitter.getAngleToPlayer(getOrigin(runningAction).pos) + other;
+				return emitter.getAngleToPlayer(origin) + other;
 			case RANDOM:
 				return runningBarrage.randomAngle() + other;
 		}
@@ -164,6 +167,7 @@ class RunningBarrage
 		else return action.triggeringBullet;
 	}
 	
+	static var basePositionVec = new Vector2D();
 	public function fire(action:RunningAction, event:FireEvent, bulletID:Int, delta:Float):IBullet 
 	{
 		var bd:BulletDef = bulletID == -1?owner.defaultBullet:owner.bullets[bulletID];
@@ -172,25 +176,41 @@ class RunningBarrage
 		
 		var baseSpeed:Float = bd.speed.get(this, action);
 		var baseAccel:Float = bd.acceleration.get(this, action);
-		var baseDirection:Float;
-		if (bd == owner.defaultBullet) {
-			baseDirection = emitter.getAngleToPlayer(origin.pos);
-		}else {
-			baseDirection = bd.direction.get(this, action);
-		}
+		var baseDirection:Float = 0;
+		var basePosition = basePositionVec;
 		
 		var lastSpeed = action.prevSpeed;
 		var lastDirection = action.prevAngle;
 		var lastAcceleration = action.prevAccel;
+		var lastPositionX = action.prevPositionX;
+		var lastPositionY = action.prevPositionY;
+		
+		basePosition.copyFrom(origin.pos);
+		if (event.def.position != null) {
+			var vec = event.def.position.getVector(this, action);
+			if (event.def.position.modifier == RELATIVE) {
+				basePosition.x = origin.pos.x + vec[0];
+				basePosition.y = origin.pos.y + vec[1];
+			}else if (event.def.position.modifier == INCREMENTAL) {
+				basePosition.x = lastPositionX + vec[0];
+				basePosition.y = lastPositionY + vec[1];
+			}
+		}
+		
+		if (bd == owner.defaultBullet) {
+			baseDirection = emitter.getAngleToPlayer(basePosition);
+		}else {
+			baseDirection = bd.direction.get(this, action);
+		}
 		
 		if (event.def.speed != null) {
-			baseSpeed = applyProperty(false, baseSpeed, lastSpeed, event.def.speed, this, action);
+			baseSpeed = applyProperty(basePosition, baseSpeed, lastSpeed, event.def.speed, this, action);
 		}
 		if (event.def.acceleration != null) {
-			baseAccel = applyProperty(false, baseAccel, lastAcceleration, event.def.acceleration, this, action);
+			baseAccel = applyProperty(basePosition, baseAccel, lastAcceleration, event.def.acceleration, this, action);
 		}
 		if (event.def.direction != null) {
-			baseDirection = applyProperty(true, baseDirection, lastDirection, event.def.direction, this, action);			
+			baseDirection = applyProperty(basePosition, baseDirection, lastDirection, event.def.direction, this, action);
 			if (event.def.direction.modifier == RELATIVE) {
 				baseDirection = action.triggeringBullet.angle + baseDirection;
 			}
@@ -199,9 +219,10 @@ class RunningBarrage
 		action.prevSpeed = baseSpeed;
 		action.prevAngle = baseDirection;
 		action.prevAccel = baseAccel;
+		action.prevPositionX = basePosition.x;
+		action.prevPositionY = basePosition.y;
 		
-		
-		lastBulletFired = emitter.emit(origin.pos, baseDirection, baseSpeed, baseAccel, delta);
+		lastBulletFired = emitter.emit(action.prevPositionX, action.prevPositionY, baseDirection, baseSpeed, baseAccel, delta);
 		lastBulletFired.speed = baseSpeed;
 		lastBulletFired.angle = baseDirection;
 		bullets.add(lastBulletFired);

@@ -9,6 +9,8 @@ enum Token
 	TBarrage;
 	TVanish;
 	TOver;
+	TFrom;
+	TPosition;
 	TSet;
 	TBullet;
 	TAction;
@@ -16,12 +18,14 @@ enum Token
 	TDo;
 	TAt;
 	TIn;
+	TWith;
 	TSpeed;
 	TDirection;
 	TAcceleration;
 	TWait;
 	TRepeat;
 	TIncrement;
+	TVector;
 	
 	TIncremental;
 	TAbsolute;

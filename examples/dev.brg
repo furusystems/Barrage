@@ -1,26 +1,10 @@
 barrage called blah
-	bullet called drop
-		speed is 0
-		acceleration is 100
-
 	bullet called mybullet
 		speed is 100
-		do action
-			do action
-				increment direction by 180 over 1 seconds
-				fire drop in relative direction 0
-				wait 1 seconds
-				increment direction by 180 over 1.3 seconds
-				wait 1 seconds
-				increment direction by -180 over 1 seconds
-				wait 1 seconds
-				increment direction by -180 over 1.3 seconds
-				wait 1 seconds
-				repeat 2 times
 
 	action called start
-		fire mybullet in absolute direction 0
-		fire mybullet in absolute direction (360/3)
-		fire mybullet in absolute direction (360/3*2)
-		wait 0.1 seconds
-		repeat 30 times
+		fire mybullet from relative position [10,0] with absolute acceleration 100
+		do action
+			wait 0.1 seconds
+			fire mybullet from incremental position [10,0] with incremental acceleration -50
+			repeat 30 times

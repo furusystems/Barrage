@@ -21,7 +21,7 @@ class PropertySet implements ITriggerableEvent
 	{
 		
 		if (def.speed != null) {
-			if (def.relative) {
+			if (def.speed.modifier==RELATIVE) {
 				runningAction.triggeringBullet.speed += def.speed.get(runningBarrage, runningAction);
 			}else {
 				runningAction.triggeringBullet.speed = def.speed.get(runningBarrage, runningAction);

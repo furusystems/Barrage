@@ -22,6 +22,8 @@ class RunningAction
 	public var prevAngle:Float;
 	public var prevSpeed:Float;
 	public var prevAccel:Float;
+	public var prevPositionX:Float;
+	public var prevPositionY:Float;
 	
 	public var actionTime:Float;
 	
@@ -40,7 +42,7 @@ class RunningAction
 	{
 		this.def = def;
 		
-		prevAngle = prevSpeed = prevAccel = sleepTime = prevDelta = 0;
+		prevAngle = prevSpeed = prevAccel = sleepTime = prevDelta = prevPositionX = prevPositionY = 0;
 		
 		properties = [];
 		for (p in def.properties) {

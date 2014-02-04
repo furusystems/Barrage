@@ -18,13 +18,13 @@
 		</dict>
 		<dict>
 			<key>match</key>
-			<string>\b(repeat|increment|by|barrage|bullet|wait|do|in|at|fire|action|set|over|die|to)\b</string>
+			<string>\b(repeat|increment|by|barrage|bullet|wait|do|in|at|with|from|fire|action|set|over|die|to)\b</string>
 			<key>name</key>
 			<string>keyword.brg</string>
 		</dict>
 		<dict>
 			<key>match</key>
-			<string>\b(called|times|absolute|speed|acceleration|direction|aimed|relative|incremental|is|frames|seconds)\b</string>
+			<string>\b(called|times|absolute|speed|acceleration|position|direction|aimed|relative|incremental|is|frames|seconds)\b</string>
 			<key>name</key>
 			<string>string.brg</string>
 		</dict>
