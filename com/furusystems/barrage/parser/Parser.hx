@@ -493,15 +493,7 @@ class Parser
 	static inline function runFire(b:Block, ?speedType:Token, ?speed:Dynamic, ?directionType:Token, ?direction:Dynamic) 
 	{
 		//trace("Run fire: " + direction);
-		var anon:Bool = false;
-		switch(b.tokens[1]) {
-			case TIdentifier:
-				anon = false;
-			case TBullet:
-				anon = true;
-			default:
-				throw new ParseError(b.lineNo, "Invalid fire statement");
-		}
+		var anon:Bool = b.tokens[1] == TBullet;
 		
 		var event = new FireEventDef();
 		
@@ -529,8 +521,8 @@ class Parser
 			}
 			
 		}
+		event.direction = new Property("Direction");
 		if (direction != null) {
-			event.direction = new Property("Direction");
 			switch(directionType) {
 				case TAbsolute:
 					event.direction.modifier = ABSOLUTE;
@@ -547,6 +539,8 @@ class Parser
 			}else {
 				event.direction.constValue = direction;
 			}
+		}else {
+			event.direction.modifier = AIMED;
 		}
 		var ad:ActionDef = cast currentElement();
 		ad.events.push(event);

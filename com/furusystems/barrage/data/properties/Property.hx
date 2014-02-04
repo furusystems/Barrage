@@ -17,7 +17,6 @@ enum PropertyModifier {
 class Property
 {
 	public var modifier:PropertyModifier;
-	public var isAimed:Bool;
 	public var isRandom:Bool;
 	public var constValue:Float = 0;
 	public var script:Null<hscript.Expr>;
@@ -30,7 +29,6 @@ class Property
 	}
 	
 	public inline function copyFrom(other:Property):Void {
-		this.isAimed = other.isAimed;
 		this.isRandom = other.isRandom;
 		this.constValue = other.constValue;
 		this.script = other.script;
