@@ -47,7 +47,7 @@ class PropertyTween implements ITriggerableEvent
 		if (def.direction != null) {
 			var angleAnimator = animator.getAngle();
 			var ang:Float = 0;
-			if (def.direction.modifier==AIMED) {
+			if (def.direction.modifier.has(AIMED)) {
 				var currentAngle:Float = bullet.angle;
 				ang = runningBarrage.emitter.getAngleToPlayer(bullet.pos);
 				while (ang - currentAngle > 180) ang -= 360;

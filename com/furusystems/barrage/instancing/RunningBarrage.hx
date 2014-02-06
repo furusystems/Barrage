@@ -139,17 +139,16 @@ class RunningBarrage
 	
 	function applyProperty(origin:Vector2D, base:Float, prev:Float, prop:Property, runningBarrage:RunningBarrage, runningAction:RunningAction):Float {
 		var other = prop.get(runningBarrage, runningAction);
-		switch(prop.modifier) {
-			case ABSOLUTE:
-				return other;
-			case INCREMENTAL:
+		if (prop.modifier.has(INCREMENTAL)) {
 				return prev + other; 
-			case RELATIVE:
+		}else if (prop.modifier.has(RELATIVE)) {
 				return base + other;
-			case AIMED:
+		}else if (prop.modifier.has(AIMED)) {
 				return emitter.getAngleToPlayer(origin) + other;
-			case RANDOM:
-				return runningBarrage.randomAngle() + other;
+		}else if (prop.modifier.has(RANDOM)) {
+				return runningBarrage.randomAngle() + other;	
+		}else {
+			return other;
 		}
 		
 	}
@@ -188,10 +187,10 @@ class RunningBarrage
 		basePosition.copyFrom(origin.pos);
 		if (event.def.position != null) {
 			var vec = event.def.position.getVector(this, action);
-			if (event.def.position.modifier == RELATIVE) {
+			if (event.def.position.modifier.has(RELATIVE)) {
 				basePosition.x = origin.pos.x + vec[0];
 				basePosition.y = origin.pos.y + vec[1];
-			}else if (event.def.position.modifier == INCREMENTAL) {
+			}else if (event.def.position.modifier.has(INCREMENTAL)) {
 				basePosition.x = lastPositionX + vec[0];
 				basePosition.y = lastPositionY + vec[1];
 			}
@@ -211,7 +210,7 @@ class RunningBarrage
 		}
 		if (event.def.direction != null) {
 			baseDirection = applyProperty(basePosition, baseDirection, lastDirection, event.def.direction, this, action);
-			if (event.def.direction.modifier == RELATIVE) {
+			if (event.def.direction.modifier.has(RELATIVE)) {
 				baseDirection = action.triggeringBullet.angle + baseDirection;
 			}
 		}

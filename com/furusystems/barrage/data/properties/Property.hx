@@ -3,6 +3,7 @@ import com.furusystems.barrage.data.properties.Property.PropertyModifier;
 import com.furusystems.barrage.instancing.RunningAction;
 import com.furusystems.barrage.instancing.RunningBarrage;
 import haxe.ds.Vector;
+import haxe.EnumFlags;
 
 /**
  * ...
@@ -17,7 +18,7 @@ enum PropertyModifier {
 }
 class Property
 {
-	public var modifier:PropertyModifier;
+	public var modifier:EnumFlags<PropertyModifier>;
 	public var isRandom:Bool;
 	public var constValue:Float = 0;
 	public var constValueVec:Vector<Float>;
@@ -27,7 +28,8 @@ class Property
 	public function new(name:String = "Property") 
 	{
 		this.name = name;
-		modifier = ABSOLUTE;
+		modifier = new EnumFlags<PropertyModifier>();
+		modifier.set(ABSOLUTE);
 		constValueVec = new Vector<Float>(2);
 		constValueVec[0] = constValueVec[1] = 0;
 	}

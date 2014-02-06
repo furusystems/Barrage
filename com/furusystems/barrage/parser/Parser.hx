@@ -502,7 +502,7 @@ class Parser
 				case [TIn, TIncremental | TAbsolute | TRelative | TAimed, TDirection, TNumber | TConst_math | TScript]:
 					directionType = b.tokens[index + 1];
 					direction = b.values[index + 3];
-				case [TFrom, TIncremental | TAbsolute | TRelative, TPosition, TScript | TVector]:
+				case [TFrom, TIncremental | TAbsolute | TRelative | TAimed, TPosition, TScript | TVector]:
 					positionType = b.tokens[index + 1];
 					position = b.values[index + 3];
 				case [TWith, TIncremental | TAbsolute | TRelative, TAcceleration, TNumber | TConst_math | TScript]:
@@ -535,11 +535,11 @@ class Parser
 			event.speed = new Property("Speed");
 			switch(speedType) {
 				case TRelative:
-					event.speed.modifier = RELATIVE;
+					event.speed.modifier.set(RELATIVE);
 				case TIncremental:
-					event.speed.modifier = INCREMENTAL;
+					event.speed.modifier.set(INCREMENTAL);
 				default:
-					event.speed.modifier = ABSOLUTE;
+					event.speed.modifier.set(ABSOLUTE);
 			}
 			if (Std.is(speed, Expr)) {
 				event.speed.script = speed;
@@ -554,11 +554,11 @@ class Parser
 			event.acceleration = new Property("Acceleration");
 			switch(accelerationType) {
 				case TRelative:
-					event.acceleration.modifier = RELATIVE;
+					event.acceleration.modifier.set(RELATIVE);
 				case TIncremental:
-					event.acceleration.modifier = INCREMENTAL;
+					event.acceleration.modifier.set(INCREMENTAL);
 				default:
-					event.acceleration.modifier = ABSOLUTE;
+					event.acceleration.modifier.set(ABSOLUTE);
 			}
 			if (Std.is(acceleration, Expr)) {
 				event.acceleration.script = acceleration;
@@ -573,11 +573,13 @@ class Parser
 			event.position = new Property("Position");
 			switch(positionType) {
 				case TIncremental:
-					event.position.modifier = INCREMENTAL;
+					event.position.modifier.set(INCREMENTAL);
 				case TRelative:
-					event.position.modifier = RELATIVE;
+					event.position.modifier.set(RELATIVE);
+				case TAimed:
+					event.position.modifier.set(AIMED);
 				default:
-					event.position.modifier = ABSOLUTE;
+					event.position.modifier.set(ABSOLUTE);
 			}
 			if (Std.is(position, Expr)) {
 				event.position.script = position;
@@ -592,13 +594,13 @@ class Parser
 		if (directionType != null) {
 			switch(directionType) {
 				case TAbsolute:
-					event.direction.modifier = ABSOLUTE;
+					event.direction.modifier.set(ABSOLUTE);
 				case TRelative:
-					event.direction.modifier = RELATIVE;
+					event.direction.modifier.set(RELATIVE);
 				case TIncremental:
-					event.direction.modifier = INCREMENTAL;
+					event.direction.modifier.set(INCREMENTAL);
 				default:
-					event.direction.modifier = AIMED;
+					event.direction.modifier.set(AIMED);
 			}
 			if (Std.is(direction, Expr)) {
 				event.direction.script = direction;
@@ -607,7 +609,7 @@ class Parser
 				event.direction.constValue = direction;
 			}
 		}else {
-			event.direction.modifier = AIMED;
+			event.direction.modifier.set(AIMED);
 		}
 		
 		var ad:ActionDef = cast currentElement();
@@ -690,7 +692,7 @@ class Parser
 				p.script = b.values[2];
 				p.scripted = true;
 			case TAimed:
-				p.modifier = AIMED;
+				p.modifier.set(AIMED);
 			default:
 		}
 		if (overTime) {

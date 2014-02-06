@@ -21,7 +21,7 @@ class PropertySet implements ITriggerableEvent
 	{
 		
 		if (def.speed != null) {
-			if (def.speed.modifier==RELATIVE) {
+			if (def.speed.modifier.has(RELATIVE)) {
 				runningAction.triggeringBullet.speed += def.speed.get(runningBarrage, runningAction);
 			}else {
 				runningAction.triggeringBullet.speed = def.speed.get(runningBarrage, runningAction);
@@ -29,7 +29,7 @@ class PropertySet implements ITriggerableEvent
 		}
 		if (def.direction != null) {
 			var ang:Float = 0;
-			if (def.direction.modifier == AIMED) {
+			if (def.direction.modifier.has(AIMED)) {
 				ang = runningBarrage.emitter.getAngleToPlayer(runningAction.triggeringBullet.pos);
 			}else {
 				ang = def.direction.get(runningBarrage, runningAction);
