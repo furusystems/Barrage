@@ -1,23 +1,42 @@
+# Comments are prefixed with pound sign
+
+# A Barrage has a starting Action that results in bullets being created
+# Actions can have sub-actions
+# Bullets can trigger actions
+# Actions triggered by bullets use the bullet's position as origin
+
+# Barrage root declaration
 barrage called waveburst
+	# Define and name a bullet.
+	# This bullet initially moves backwards, but accelerates towards a positive velocity
 	bullet called offspring
 		speed is -100
 		acceleration is 150
+		# This bullet action waits a second before turning towards the player
 		do action
 			wait 1 seconds
 			set direction to aimed over 1 seconds
 
+	# This is our base bullet
 	bullet called source
 		speed is 100
 		do action
+			# This action immediately triggers a sub-action
 			do action
+				# fires 6 360 degree spreads of 11 bullets, one every quarter second
 				wait 0.25 seconds
+				# Math expressions in parentheses are evaluated to constants at build time 
 				fire offspring in aimed direction (360/10*0.5)
 				do action
 					fire offspring in incremental direction (360/10)
 					repeat 10 times
 				repeat 6 times
+			# wait for the sub-action to complete..
 			wait (6*0.25) seconds
+			# then die 
 			die
 
+	# Barrage entry point. Every barrage must have a start action 
 	action called start
+		# Fire a source bullet directly towards the player 
 		fire source in aimed direction 0
