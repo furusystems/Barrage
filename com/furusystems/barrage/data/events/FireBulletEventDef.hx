@@ -13,9 +13,6 @@ class FireBulletEventDef extends EventDef
 	public var acceleration:Property;
 	public var direction:Property;
 	public var position:Property;
-	public var length:Property;
-	public var width:Property;
-	public var damage:Property;
 	public function new() 
 	{
 		super();

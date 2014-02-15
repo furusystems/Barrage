@@ -1,9 +1,11 @@
 package com.furusystems.barrage.instancing;
 import com.furusystems.barrage.Barrage;
+import com.furusystems.barrage.data.BeamDef;
 import com.furusystems.barrage.data.BulletDef;
 import com.furusystems.barrage.data.properties.Property;
 import com.furusystems.barrage.instancing.animation.Animator;
-import com.furusystems.barrage.instancing.events.FireEvent;
+import com.furusystems.barrage.instancing.events.FireBeamEvent;
+import com.furusystems.barrage.instancing.events.FireBulletEvent;
 import com.furusystems.barrage.instancing.IOrigin;
 import com.furusystems.flywheel.events.Signal1.Signal1;
 import com.furusystems.flywheel.geom.Vector2D;
@@ -18,7 +20,6 @@ class RunningBarrage
 {
 	public var owner:Barrage;
 	public var initAction:RunningAction;
-	//public var allActions:Vector<RunningAction>;
 	public var activeActions:Array<RunningAction>;
 	public var time:Float = 0;
 	
@@ -166,8 +167,16 @@ class RunningBarrage
 		else return action.triggeringBullet;
 	}
 	
+	public function fireBeam(action:RunningAction, event:FireBeamEvent, bulletID:Int, delta:Float):IBeam 
+	{
+		var bd:BeamDef = bulletID == -1?owner.defaultBeam:owner.beams[bulletID];
+		
+		//var origin = getOrigin(action);
+		return null;
+	}
+	
 	static var basePositionVec = new Vector2D();
-	public function fire(action:RunningAction, event:FireEvent, bulletID:Int, delta:Float):IBullet 
+	public function fireBullet(action:RunningAction, event:FireBulletEvent, bulletID:Int, delta:Float):IBullet 
 	{
 		var bd:BulletDef = bulletID == -1?owner.defaultBullet:owner.bullets[bulletID];
 		

@@ -7,7 +7,8 @@ package com.furusystems.barrage.data;
 enum EventType {
 	PROPERTY_SET;
 	PROPERTY_TWEEN;
-	FIRE;
+	FIRE_BULLET;
+	FIRE_BEAM;
 	ACTION;
 	ACTION_REF;
 	DIE;

@@ -12,6 +12,9 @@ class PropertySetDef extends EventDef
 	public var direction:Property;
 	public var acceleration:Property;
 	public var position:Property;
+	public var length:Property;
+	public var width:Property;
+	public var damage:Property;
 	
 	public var relative:Bool;
 	public function new() 

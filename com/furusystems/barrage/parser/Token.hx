@@ -12,6 +12,7 @@ enum Token
 	TFrom;
 	TPosition;
 	TSet;
+	TBeam;
 	TBullet;
 	TAction;
 	TFire;
@@ -19,13 +20,17 @@ enum Token
 	TAt;
 	TIn;
 	TWith;
-	TSpeed;
-	TDirection;
-	TAcceleration;
 	TWait;
 	TRepeat;
 	TIncrement;
 	TVector;
+	
+	TWidth;
+	TLength;
+	TDamage;
+	TSpeed;
+	TDirection;
+	TAcceleration;
 	
 	TIncremental;
 	TAbsolute;

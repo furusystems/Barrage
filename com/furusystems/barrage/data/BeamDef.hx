@@ -4,19 +4,19 @@ import com.furusystems.barrage.data.properties.Property;
  * ...
  * @author Andreas Rønning
  */
-class BulletDef extends BarrageItemDef
+class BeamDef extends BarrageItemDef
 {
-	public var speed:Property;
+	public var width:Property;
+	public var length:Property;
 	public var direction:Property;
-	public var acceleration:Property;
 	public var damage:Property;
 	public var action:Int = -1; //pointers to predefined actions
 	public function new(name:String) 
 	{
 		super(name);
-		speed = new Property("Speed");
+		width = new Property("Width");
+		length = new Property("Length");
 		direction = new Property("Direction");
-		acceleration = new Property("Acceleration");
 		damage = new Property("Damage");
 	}
 	

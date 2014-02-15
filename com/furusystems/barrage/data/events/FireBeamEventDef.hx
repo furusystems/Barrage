@@ -6,11 +6,9 @@ import com.furusystems.barrage.data.properties.Property;
  * ...
  * @author Andreas Rønning
  */
-class FireBulletEventDef extends EventDef
+class FireBeamEventDef extends EventDef
 {
 	public var bulletID:Int = -1;
-	public var speed:Property;
-	public var acceleration:Property;
 	public var direction:Property;
 	public var position:Property;
 	public var length:Property;
@@ -19,7 +17,7 @@ class FireBulletEventDef extends EventDef
 	public function new() 
 	{
 		super();
-		type = EventType.FIRE_BULLET;
+		type = EventType.FIRE_BEAM;
 	}
 	
 }

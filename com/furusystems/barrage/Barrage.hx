@@ -1,6 +1,7 @@
 package com.furusystems.barrage;
 import com.furusystems.barrage.Barrage;
 import com.furusystems.barrage.data.ActionDef;
+import com.furusystems.barrage.data.BeamDef;
 import com.furusystems.barrage.data.BulletDef;
 import com.furusystems.barrage.instancing.IBulletEmitter;
 import com.furusystems.barrage.instancing.RunningBarrage;
@@ -20,13 +21,16 @@ class Barrage
 	public var actions:Array<ActionDef>;
 	public var start:ActionDef;
 	public var bullets:Array<BulletDef>;
+	public var beams:Array<BeamDef>;
 	public var defaultBullet:BulletDef;
+	public var defaultBeam:BeamDef;
 	public var executor:Interp;
 	public var frameRate:Int;
 	public function new() {
 		defaultBullet = new BulletDef("Default");
 		defaultBullet.acceleration.set(0);
 		defaultBullet.speed.set(50);
+		defaultBeam = new BeamDef("Default");
 		frameRate = 60; //default
 		executor = new Interp();
 		executor.variables.set("math", Math);
@@ -35,6 +39,7 @@ class Barrage
 		difficulty = 1;
 		actions = [];
 		bullets = [];
+		beams = [];
 	}
 	
 	function tri(x:Float, a:Float = 0.5):Float

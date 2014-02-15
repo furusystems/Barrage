@@ -2,6 +2,7 @@ package com.furusystems.barrage.parser;
 import com.furusystems.barrage.Barrage;
 import com.furusystems.barrage.data.ActionDef;
 import com.furusystems.barrage.data.BarrageItemDef;
+import com.furusystems.barrage.data.BeamDef;
 import com.furusystems.barrage.data.BulletDef;
 import com.furusystems.barrage.data.events.ActionEventDef;
 import com.furusystems.barrage.data.events.ActionReferenceEventDef;
@@ -37,6 +38,7 @@ class Parser
 	static var bulletIdMap:Map<String,Int>;
 	static var actionIdMap:Map<String,Int>;
 	static var bulletDefMap:Map<String,BulletDef>;
+	static var beamDefMap:Map<String,BeamDef>;
 	static var actionDefMap:Map<String,ActionDef>;
 	static var actionIDs:Int;
 	static var bulletIDs:Int;
@@ -65,6 +67,7 @@ class Parser
 		bulletIdMap = new Map<String,Int>();
 		actionIdMap = new Map<String,Int>();
 		bulletDefMap = new Map<String,BulletDef>();
+		beamDefMap = new Map<String,BeamDef>();
 		actionDefMap = new Map<String,ActionDef>();
 		actionIDs = 0;
 		bulletIDs = 0;
@@ -77,6 +80,8 @@ class Parser
 					buildActionDef(b);
 				case [TBullet, TIdentifier]:
 					buildBulletDef(b);
+				case [TBeam, TIdentifier]:
+					buildBeamDef(b);
 				default:
 			}
 		}
@@ -89,11 +94,17 @@ class Parser
 			var bd = bulletDefMap.get(k);
 			output.bullets[bulletIdMap.get(bd.name)] = bd;
 		}
+		for (k in beamDefMap.keys()) {
+			var bd = beamDefMap.get(k);
+			trace("Beam: " + k);
+			output.beams[bulletIdMap.get(bd.name)] = bd;
+		}
 		
 		
 		bulletIdMap = null;
 		actionIdMap = null;
 		bulletDefMap = null;
+		beamDefMap = null;
 		actionDefMap = null;
 		if (output.start == null) throw new ParseError(0, "No action called start");
 		var out = output;
@@ -166,6 +177,30 @@ class Parser
 	static inline function uniqueName():String
 	{
 		return "" + uidPool++;
+	}
+	
+	static function buildBeamDef(b:Block):BeamDef
+	{
+		var bd = new BeamDef(b.values[1]);
+		
+		pushStack(bd);
+		if (bulletIdMap.exists(bd.name)) {
+			bd.id = bulletIdMap.get(bd.name);
+		}else {
+			bulletIdMap.set(bd.name, bulletIDs++);
+			beamDefMap.set(bd.name, bd);
+		}
+		
+		for (c in b.children) {
+			switch(c.tokens) {
+				case [TDo, TAction]:
+					buildActionDef(c, true);
+				default:
+					readStatement(c);
+			}
+		}
+		popStack();
+		return bd;
 	}
 	
 	static function buildBulletDef(b:Block, anon:Bool = false):BulletDef
@@ -400,6 +435,14 @@ class Parser
 				return TRepeat;
 			case "start":
 				return TStart;
+			case "beam":
+				return TBeam;
+			case "width":
+				return TWidth;
+			case "length":
+				return TLength;
+			case "damage":
+				return TDamage;
 			default:
 				return TIdentifier;
 		}
@@ -442,7 +485,6 @@ class Parser
 	static function parseStatement(block:Block):String {
 		var out:String = "";
 		for (i in 0...block.tokens.length) {
-			//out += t.type + ":"+t.data + " ";
 			out += block.tokens[i]+ ":"+block.values[i] + " ";
 		}
 		return out;
@@ -462,11 +504,11 @@ class Parser
 			return;
 		}
 		switch(b.tokens) {
-			case [TIdentifier|TSpeed | TDirection | TAcceleration, TNumber | TConst_math | TScript]:
+			case [TIdentifier | TSpeed | TDirection | TAcceleration | TDamage | TWidth | TLength, TNumber | TConst_math | TScript]:
 				runPropertyInit(b);
-			case [TSet|TIncrement, TSpeed | TDirection | TAcceleration, TNumber | TConst_math | TScript | TAimed]:
+			case [TSet|TIncrement, TSpeed | TDirection | TAcceleration | TWidth | TDamage | TLength, TNumber | TConst_math | TScript | TAimed]:
 				runPropertySet(b, false, b.tokens[0] == TIncrement);
-			case [TSet|TIncrement, TSpeed | TDirection | TAcceleration, TNumber|TConst_math|TScript|TAimed, TOver, TNumber|TConst_math|TScript, TSeconds | TFrames]:
+			case [TSet|TIncrement, TSpeed | TDirection | TAcceleration | TWidth | TDamage | TLength, TNumber|TConst_math|TScript|TAimed, TOver, TNumber|TConst_math|TScript, TSeconds | TFrames]:
 				runPropertySet(b, true, b.tokens[0] == TIncrement);
 			case [TWait, TNumber|TConst_math|TScript, TFrames | TSeconds]:
 				runWait(b);
@@ -486,11 +528,17 @@ class Parser
 		var accelerationType:Token = null;
 		var directionType:Token = null;
 		var positionType:Token = null;
+		var widthType:Token = null;
+		var lengthType:Token = null;
+		var damageType:Token = null;
 		
 		var speed:Dynamic = null;
 		var acceleration:Dynamic = null;
 		var direction:Dynamic = null;
 		var position:Dynamic = null;
+		var width:Dynamic = null;
+		var lemgth:Dynamic = null;
+		var damage:Dynamic = null;
 		
 		var index = 2;
 		
@@ -514,8 +562,23 @@ class Parser
 			index += 4;
 		}
 		
-		
+		if (b.tokens[1] == TIdentifier) {
+			//check definitions if it's beam or bullet
+			if (beamDefMap.exists(b.values[1])) {
+				runBeam(b, speedType, speed, directionType, direction, positionType, position, accelerationType, acceleration);
+				return;
+			}else if (bulletDefMap.exists(b.values[1])) {
+				runFire(b, speedType, speed, directionType, direction, positionType, position, accelerationType, acceleration);
+				return;
+			}else {
+				throw new ParseError(b.lineNo, "Unknown bullet or beam");
+			}
+		}
 		runFire(b, speedType, speed, directionType, direction, positionType, position, accelerationType, acceleration);
+	}
+	
+	static inline function runBeam(b:Block, ?lengthType:Token, ?length:Dynamic, ?directionType:Token, ?direction:Dynamic, ?positionType:Token, ?position:Dynamic, ?damageType:Token, ?damage:Dynamic, ?widthType:Token, ?width:Dynamic) 
+	{
 	}
 	
 	static inline function runFire(b:Block, ?speedType:Token, ?speed:Dynamic, ?directionType:Token, ?direction:Dynamic, ?positionType:Token, ?position:Dynamic, ?accelerationType:Token, ?acceleration:Dynamic) 
@@ -523,7 +586,7 @@ class Parser
 		//trace("Run fire: " + direction);
 		var anon:Bool = b.tokens[1] == TBullet;
 		
-		var event = new FireEventDef();
+		var event = new FireBulletEventDef();
 		
 		if (!anon) {
 			event.bulletID = bulletIdMap.get(b.values[1]);
@@ -681,6 +744,12 @@ class Parser
 				p = event.direction = new Property("Direction");
 			case TAcceleration:
 				p = event.acceleration = new Property("Acceleration");
+			case TWidth:
+				p = event.width = new Property("Width");
+			case TLength:
+				p = event.length = new Property("Length");
+			case TDamage:
+				p = event.damage = new Property("Damage");
 			default:
 				throw new ParseError(b.lineNo, "Invalid property");
 		}
@@ -721,19 +790,41 @@ class Parser
 		var value:Null<Dynamic>;
 		var p:Property = null;
 		var object:Dynamic = currentElement();
-		if(b.tokens[0] != TIdentifier){
-			switch(b.tokens[0]) {
-				case TSpeed:
-					p = object.speed;
-				case TDirection:
-					p = object.direction;
-				case TAcceleration:
-					p = object.acceleration;
-				case TPosition:
-					p = object.position;
-				default:
+		if (Std.is(object, BulletDef)) {
+			if(b.tokens[0] != TIdentifier){
+				switch(b.tokens[0]) {
+					case TSpeed:
+						p = object.speed;
+					case TDirection:
+						p = object.direction;
+					case TAcceleration:
+						p = object.acceleration;
+					case TPosition:
+						p = object.position;
+					default:
+				}
+			}else {
+				p = new Property(b.values[0]);
+				object.properties.push(p);
 			}
-		}else {
+		}else if (Std.is(object, BeamDef)) {
+			if(b.tokens[0] != TIdentifier){
+				switch(b.tokens[0]) {
+					case TLength:
+						p = object.length;
+					case TDirection:
+						p = object.direction;
+					case TWidth:
+						p = object.width;
+					case TDamage:
+						p = object.damage;
+					default:
+				}
+			}else {
+				p = new Property(b.values[0]);
+				object.properties.push(p);
+			}
+		}else {			
 			p = new Property(b.values[0]);
 			object.properties.push(p);
 		}

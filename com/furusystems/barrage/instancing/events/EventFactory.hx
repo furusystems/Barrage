@@ -1,5 +1,7 @@
 package com.furusystems.barrage.instancing.events;
 import com.furusystems.barrage.data.EventDef;
+import com.furusystems.barrage.data.events.FireBeamEventDef;
+import com.furusystems.barrage.instancing.events.FireBulletEvent;
 
 /**
  * ...
@@ -14,8 +16,10 @@ class EventFactory
 				out = new Wait(def);
 			case EventType.DIE:
 				out = new DieEvent(def);
-			case EventType.FIRE:
-				out = new FireEvent(def);
+			case EventType.FIRE_BULLET:
+				out = new FireBulletEvent(def);
+			case EventType.FIRE_BEAM:
+				out = new FireBeamEvent(def);
 			case EventType.PROPERTY_SET:
 				out = new PropertySet(def);
 			case EventType.PROPERTY_TWEEN:

@@ -7,7 +7,7 @@ barrage called beamtest
 			set length to 400 over 1 seconds
 			wait 1 seconds
 			set width to 80 over 0.2 seconds
-			set damage to 100
+			set damage to 100 over 0.2 seconds
 			wait 5 seconds
 			set damage to 0
 			set width to 0 over 0.1 seconds
@@ -15,13 +15,12 @@ barrage called beamtest
 			die
 
 	action called start
-		fire mybeam from relative position [0,-40]
+		fire mybeam from relative position [0,-40] in aimed direction 0
 		wait 1 seconds
-		fire mybeam from relative position [0,-20]
+		fire mybeam from relative position [0,-20] in aimed direction 0
 		wait 1 seconds
-		fire mybeam from relative position [0,0]
+		fire mybeam from relative position [0,0] in aimed direction 0
 		wait 1 seconds
-		fire mybeam from relative position [0,20]
+		fire mybeam from relative position [0,20] in aimed direction 0
 		wait 1 seconds
-		fire mybeam from relative position [0,40]
-		wait 1 seconds
+		fire mybeam from relative position [0,40] in aimed direction 0
