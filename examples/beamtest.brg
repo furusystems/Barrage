@@ -1,0 +1,27 @@
+barrage called beamtest
+	beam called mybeam
+		length is 0
+		width is 5
+		damage is 0
+		do action
+			set length to 400 over 1 seconds
+			wait 1 seconds
+			set width to 80 over 0.2 seconds
+			set damage to 100
+			wait 5 seconds
+			set damage to 0
+			set width to 0 over 0.1 seconds
+			wait 0.1 seconds
+			die
+
+	action called start
+		fire mybeam from relative position [0,-40]
+		wait 1 seconds
+		fire mybeam from relative position [0,-20]
+		wait 1 seconds
+		fire mybeam from relative position [0,0]
+		wait 1 seconds
+		fire mybeam from relative position [0,20]
+		wait 1 seconds
+		fire mybeam from relative position [0,40]
+		wait 1 seconds
