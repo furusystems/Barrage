@@ -1,6 +1,7 @@
 package com.furusystems.barrage.instancing.events;
 import com.furusystems.barrage.data.EventDef;
 import com.furusystems.barrage.data.events.PropertyTweenDef;
+import com.furusystems.barrage.data.properties.Property.PropertyType;
 import com.furusystems.barrage.instancing.events.ITriggerableEvent;
 import com.furusystems.barrage.instancing.RunningAction;
 import com.furusystems.barrage.instancing.RunningBarrage;
@@ -18,11 +19,7 @@ class PropertyTween implements ITriggerableEvent
 		this.def = cast def;
 	}
 	public inline function trigger(runningAction:RunningAction, runningBarrage:RunningBarrage, delta:Float):Void 
-	{
-		#if debug
-		trace("Property tween");
-		#end
-		
+	{	
 		var tweenTimeNum:Float;
 		if (def.scripted) {
 			tweenTimeNum = runningBarrage.owner.executor.execute(def.tweenTimeScript);
@@ -35,7 +32,7 @@ class PropertyTween implements ITriggerableEvent
 		var bullet = runningAction.triggeringBullet;
 		var animator = runningBarrage.getAnimator(bullet);
 		if (def.speed != null) {
-			var speedAnimator = animator.getSpeed();
+			var speedAnimator = animator.getProp(PropertyType.SPEED);
 			var speedValue = 0.0;
 			if (def.relative) {
 				speedValue = bullet.speed + def.speed.get(runningBarrage, runningAction);
@@ -45,7 +42,7 @@ class PropertyTween implements ITriggerableEvent
 			speedAnimator.retarget(bullet.speed, speedValue, tweenTimeNum, delta);
 		}
 		if (def.direction != null) {
-			var angleAnimator = animator.getAngle();
+			var angleAnimator = animator.getProp(PropertyType.DIRECTION);
 			var ang:Float = 0;
 			if (def.direction.modifier.has(AIMED)) {
 				var currentAngle:Float = bullet.angle;
@@ -62,7 +59,7 @@ class PropertyTween implements ITriggerableEvent
 			
 		}
 		if (def.acceleration != null) {
-			var accelAnimator = animator.getAcceleration();
+			var accelAnimator = animator.getProp(PropertyType.ACCELERATION);
 			var accel = def.acceleration.get(runningBarrage, runningAction);
 			if (def.relative) {
 				accel = bullet.acceleration + accel;

@@ -11,6 +11,5 @@ interface IBullet extends IOrigin
 	var angle:Float;
 	var speed:Float;
 	var active:Bool;
-	var id:Int;
-	
+	var id:Int;	
 }

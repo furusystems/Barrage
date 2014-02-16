@@ -92,13 +92,14 @@ class RunningBarrage
 		}
 	}
 	
-	public function getAnimator(target:IBullet):Animator {
-		for (a in animators) {
-			if (a.target == target) return a;
-		}
-		var a = new Animator(target);
-		animators.add(a);
-		return a;
+	public function getAnimator(target):Animator {
+		//for (a in animators) {
+			//if (a.target == target) return a;
+		//}
+		//var a = createAnimator(target);
+		//animators.add(a);
+		//return a;
+		return null;
 	}
 	
 	public inline function runActionByID(triggerAction:RunningAction, id:Int, ?triggerBullet:IBullet, ?overrides:Array<Property>, delta:Float = 0):RunningAction {

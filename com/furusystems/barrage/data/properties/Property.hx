@@ -16,6 +16,14 @@ enum PropertyModifier {
 	AIMED;
 	RANDOM;
 }
+enum PropertyType {
+	SPEED;
+	DIRECTION;
+	ACCELERATION;
+	DAMAGE;
+	WIDTH;
+	LENGTH;
+}
 class Property
 {
 	public var modifier:EnumFlags<PropertyModifier>;
