@@ -6,8 +6,9 @@
   "description": "",
   "version": "1.0.0",
   "releasenote": "",
-  "contributors": [""],
+  "contributors": ["decept404"],
   "dependencies": {
-	  "hscript":""
+	  "hscript":"",
+	  "fsignal":""
   }
 }

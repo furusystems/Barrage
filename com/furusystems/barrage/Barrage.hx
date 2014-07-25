@@ -15,6 +15,7 @@ import hscript.Interp;
 @:allow(com.furusystems.barrage.parser.Parser)
 class Barrage
 {
+	static var cache = new Map<String,Barrage>();
 	public var name:String;
 	public var difficulty(get,set):Int;
 	public var actions:Array<ActionDef>;
@@ -37,7 +38,7 @@ class Barrage
 		bullets = [];
 	}
 	
-	function tri(x:Float, a:Float = 0.5):Float
+	inline function tri(x:Float, a:Float = 0.5):Float
 	{
 		x = x / (2.0*Math.PI);
 		x = x % 1.0;
@@ -45,7 +46,7 @@ class Barrage
 		if(x<a) x=x/a; else x=1.0-(x-a)/(1.0-a);
 		return -1.0+2.0*x;
 	}
-	function sqr(x:Float, a:Float = 0.5):Float
+	inline function sqr(x:Float, a:Float = 0.5):Float
 	{
 		if( Math.sin(x)>a ) x=1.0; else x=-1.0;
 		return x;
@@ -62,15 +63,27 @@ class Barrage
 		return 'Barrage($name)';
 	}
 	
-	public inline function run(emitter:IBulletEmitter):RunningBarrage {
-		return new RunningBarrage(emitter, this);
+	public inline function run(emitter:IBulletEmitter, speedScale:Float = 1.0, accelScale:Float = 1.0):RunningBarrage {
+		trace("Creating barrage runner");
+		return new RunningBarrage(emitter, this, speedScale,accelScale);
 	}
 	
-	public static inline function fromString(str:String):Barrage {
-		#if debug
-		trace("Parsing " + str);
-		#end
-		return Parser.parse(str);
+	public static function clearCache():Void {
+		cache = new Map<String, Barrage>();
+	}
+	
+	public static inline function fromString(str:String, useCache:Bool = true):Barrage {
+		trace("Creating barrage from string");
+		if (useCache) {
+			if (cache.exists(str)) return cache.get(str);
+			else {
+				var b = Parser.parse(str);
+				cache[str] = b;
+				return b;
+			}
+		}else {
+			return Parser.parse(str);
+		}
 	}
 	
 }

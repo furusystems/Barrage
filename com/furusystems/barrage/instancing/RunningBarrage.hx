@@ -5,8 +5,8 @@ import com.furusystems.barrage.data.properties.Property;
 import com.furusystems.barrage.instancing.animation.Animator;
 import com.furusystems.barrage.instancing.events.FireEvent;
 import com.furusystems.barrage.instancing.IOrigin;
-import com.furusystems.flywheel.events.Signal1.Signal1;
 import com.furusystems.flywheel.geom.Vector2D;
+import fsignal.Signal1;
 import haxe.ds.GenericStack;
 import haxe.ds.Vector.Vector;
 
@@ -29,12 +29,18 @@ class RunningBarrage
 	public var animators:GenericStack<Animator>; //TODO: Replace with vector pool?
 	public var bullets:GenericStack<IBullet>; 
 	
+	public var speedScale:Float;
+	public var accelScale:Float;
+	static var basePositionVec = new Vector2D();
+	
 	var started:Bool;
 	var lastDelta:Float = 0;
 	public var emitter:IBulletEmitter;
 	
-	public function new(emitter:IBulletEmitter, owner:Barrage) 
+	public function new(emitter:IBulletEmitter, owner:Barrage, speedScale:Float = 1.0, accelScale:Float = 1.0) 
 	{
+		this.speedScale = speedScale;
+		this.accelScale = accelScale;
 		onComplete = new Signal1<RunningBarrage>();
 		this.emitter = emitter;
 		this.owner = owner;
@@ -165,8 +171,6 @@ class RunningBarrage
 		}
 		else return action.triggeringBullet;
 	}
-	
-	static var basePositionVec = new Vector2D();
 	public function fire(action:RunningAction, event:FireEvent, bulletID:Int, delta:Float):IBullet 
 	{
 		var bd:BulletDef = bulletID == -1?owner.defaultBullet:owner.bullets[bulletID];
@@ -221,8 +225,9 @@ class RunningBarrage
 		action.prevPositionX = basePosition.x;
 		action.prevPositionY = basePosition.y;
 		
-		lastBulletFired = emitter.emit(action.prevPositionX, action.prevPositionY, baseDirection, baseSpeed, baseAccel, delta);
-		lastBulletFired.speed = baseSpeed;
+		var spd = baseSpeed * speedScale;
+		lastBulletFired = emitter.emit(action.prevPositionX, action.prevPositionY, baseDirection, spd, baseAccel*accelScale, delta);
+		lastBulletFired.speed = spd;
 		lastBulletFired.angle = baseDirection;
 		bullets.add(lastBulletFired);
 		return lastBulletFired;

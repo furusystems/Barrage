@@ -19,9 +19,6 @@ class PropertyTween implements ITriggerableEvent
 	}
 	public inline function trigger(runningAction:RunningAction, runningBarrage:RunningBarrage, delta:Float):Void 
 	{
-		#if debug
-		trace("Property tween");
-		#end
 		
 		var tweenTimeNum:Float;
 		if (def.scripted) {
