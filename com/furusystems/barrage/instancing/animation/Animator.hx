@@ -19,7 +19,7 @@ class Animator
 	inline public function update(delta:Float):Bool {
 		if (target.active == false) {
 			return false;
-		}else{
+		}else {
 			var persist = false;
 			if (angle != null) {
 				persist = true;

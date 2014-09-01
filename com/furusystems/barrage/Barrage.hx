@@ -65,7 +65,7 @@ class Barrage
 	
 	public inline function run(emitter:IBulletEmitter, speedScale:Float = 1.0, accelScale:Float = 1.0):RunningBarrage {
 		//trace("Creating barrage runner");
-		return new RunningBarrage(emitter, this, speedScale,accelScale);
+		return new RunningBarrage(emitter, this, speedScale, accelScale);
 	}
 	
 	public static function clearCache():Void {
