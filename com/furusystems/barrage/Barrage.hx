@@ -64,7 +64,7 @@ class Barrage
 	}
 	
 	public inline function run(emitter:IBulletEmitter, speedScale:Float = 1.0, accelScale:Float = 1.0):RunningBarrage {
-		trace("Creating barrage runner");
+		//trace("Creating barrage runner");
 		return new RunningBarrage(emitter, this, speedScale,accelScale);
 	}
 	
@@ -73,7 +73,7 @@ class Barrage
 	}
 	
 	public static inline function fromString(str:String, useCache:Bool = true):Barrage {
-		trace("Creating barrage from string");
+		//trace("Creating barrage from string");
 		if (useCache) {
 			if (cache.exists(str)) return cache.get(str);
 			else {

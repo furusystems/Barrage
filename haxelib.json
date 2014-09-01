@@ -9,6 +9,8 @@
   "contributors": ["decept404"],
   "dependencies": {
 	  "hscript":"",
-	  "fsignal":""
+	  "fsignal":"",
+	  "delta":"",
+	  "flywheel":""
   }
 }
