@@ -13,11 +13,9 @@ enum EventType {
 	DIE;
 	WAIT;
 }
-class EventDef
-{
+
+class EventDef {
 	public var type:EventType;
-	public function new() 
-	{
-	}
-	
+
+	public function new() {}
 }

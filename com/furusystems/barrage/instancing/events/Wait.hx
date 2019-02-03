@@ -1,4 +1,5 @@
 package com.furusystems.barrage.instancing.events;
+
 import com.furusystems.barrage.data.EventDef;
 import com.furusystems.barrage.data.events.WaitDef;
 import com.furusystems.barrage.instancing.events.ITriggerableEvent;
@@ -9,31 +10,30 @@ import com.furusystems.barrage.instancing.RunningBarrage;
  * ...
  * @author Andreas Rønning
  */
-class Wait implements ITriggerableEvent
-{
+class Wait implements ITriggerableEvent {
 	public var hasRun:Bool;
 	public var def:WaitDef;
-	public function new(def:EventDef ) 
-	{
+
+	public function new(def:EventDef) {
 		this.def = cast def;
 	}
-	public inline function trigger(runningAction:RunningAction, runningBarrage:RunningBarrage, delta:Float):Void 
-	{
+
+	public inline function trigger(runningAction:RunningAction, runningBarrage:RunningBarrage, delta:Float):Void {
 		var sleepTimeNum:Float;
 		if (def.scripted) {
 			sleepTimeNum = runningBarrage.owner.executor.execute(def.waitTimeScript);
-		}else {
+		} else {
 			sleepTimeNum = def.waitTime;
 		}
-		switch(def.durationType) {
+		switch (def.durationType) {
 			case SECONDS:
 				runningAction.sleepTime += sleepTimeNum;
 			case FRAMES:
 				runningAction.sleepTime += (sleepTimeNum * 1 / runningBarrage.owner.frameRate);
 		}
 	}
+
 	public inline function getType():EventType {
 		return def.type;
 	}
-	
 }

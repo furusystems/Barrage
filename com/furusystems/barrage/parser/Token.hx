@@ -1,11 +1,10 @@
 package com.furusystems.barrage.parser;
+
 /**
  * ...
  * @author Andreas Rønning
  */
-enum Token
-{
-	
+enum Token {
 	TBarrage;
 	TVanish;
 	TOver;
@@ -23,33 +22,28 @@ enum Token
 	TDirection;
 	TAcceleration;
 	TWait;
+	TForever;
 	TRepeat;
 	TIncrement;
 	TVector;
-	
 	TIncremental;
 	TAbsolute;
 	TAimed;
 	TRelative;
-	
 	THorizontal;
 	TVertical;
-	
 	TFrames;
 	TSeconds;
 	TStart;
-	
 	TIdentifier;
 	TScript;
 	TConst_math;
 	TNumber;
-	
-	//ignored tokens
+	// ignored tokens
 	TIgnored;
-	//called;
-	//then;
-	//is;
-	//to;
-	//times;
-	
+	// called;
+	// then;
+	// is;
+	// to;
+	// times;
 }

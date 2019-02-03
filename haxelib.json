@@ -6,11 +6,13 @@
   "description": "",
   "version": "1.0.0",
   "releasenote": "",
-  "contributors": ["decept404"],
+  "contributors": [
+    "decept404"
+  ],
   "dependencies": {
-	  "hscript":"",
-	  "fsignal":"",
-	  "delta":"",
-	  "flywheel":""
+    "hscript": "",
+    "fsignal": "",
+    "delta": "",
+    "glm": ""
   }
 }

@@ -1,16 +1,17 @@
 package com.furusystems.barrage.instancing;
-import com.furusystems.flywheel.geom.Vector2D;
+
+import glm.Vec2;
+
 /**
  * ...
  * @author Andreas Rønning
  */
-interface IBullet extends IOrigin
-{
+interface IBarrageBullet extends IOrigin {
 	var acceleration:Float;
-	var velocity:Vector2D;
+	var velocityX:Float;
+	var velocityY:Float;
 	var angle:Float;
 	var speed:Float;
 	var active:Bool;
 	var id:Int;
-	
 }

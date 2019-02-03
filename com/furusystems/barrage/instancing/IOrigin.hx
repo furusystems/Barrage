@@ -1,11 +1,12 @@
 package com.furusystems.barrage.instancing;
-import com.furusystems.flywheel.geom.Vector2D;
+
+import glm.Vec2;
 
 /**
  * ...
  * @author Andreas Rønning
  */
-interface IOrigin
-{
-	var pos:Vector2D;
+interface IOrigin {
+	var posX:Float;
+	var posY:Float;
 }
